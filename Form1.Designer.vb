@@ -91,7 +91,7 @@ Partial Class frmMain
         '
         Me.mnFrm.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnGetRec, Me.ToolStripMenuItem2, Me.ToolStripMenuItem3, Me.ToolStripMenuItem4, Me.ToolStripMenuItem5})
         Me.mnFrm.Name = "mnFrm"
-        Me.mnFrm.Size = New System.Drawing.Size(184, 136)
+        Me.mnFrm.Size = New System.Drawing.Size(184, 114)
         '
         'mnGetRec
         '

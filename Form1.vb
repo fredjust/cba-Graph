@@ -42,6 +42,7 @@
 
     Dim sqFrom As String
     Dim sqTo As String
+    Dim MoveByClic As Boolean
     Dim EffaceNoir As Boolean = False   'une rustine de dernière minute
     Public ThePOS As ObjFenMoves
 
@@ -320,20 +321,32 @@
 #Region "Evenement de la picturebox1"
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
 
-
-        sqFrom = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+        If MoveByClic Then
+            sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
             + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
 
-        DrawMove()
+        Else
+            sqFrom = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+            + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+            DrawMove()
+        End If
+        
+
+
 
     End Sub
 
     Private Sub PictureBox1_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseUp
         sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
             + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
-
-        DoMove()
-        DrawPiece()
+        If sqFrom = sqTo Then
+            MoveByClic = True
+        Else
+            MovebyClic = False
+            DoMove()
+            DrawPiece()
+        End If
+        
     End Sub
 
 #End Region
@@ -380,7 +393,7 @@ err:
         If sqFrom <> sqTo Then
 
             If Not ThePOS.IsValidMove(sqFrom & sqTo) Then
-                Beep()
+                'Beep()
             Else
 
                 deletenextitem()
@@ -441,5 +454,9 @@ err:
 
     Private Sub mnGetRec_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnGetRec.Click
         MsgBox(ThePOS.GetRec())
+    End Sub
+
+    Private Sub PictureBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PictureBox1.Click
+
     End Sub
 End Class
