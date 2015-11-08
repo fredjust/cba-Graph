@@ -287,7 +287,9 @@
     End Sub
 
     Private Sub frmMain_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
-        mnFrm.Show()
+        If e.Button = MouseButtons.Right Then
+            mnFrm.Show(Control.MousePosition)
+        End If
     End Sub
 
     Private Sub Form1_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
@@ -321,32 +323,40 @@
 #Region "Evenement de la picturebox1"
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
 
-        If MoveByClic Then
-            sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-            + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+        If e.Button = MouseButtons.Right Then
 
         Else
-            sqFrom = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-            + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
-            DrawMove()
+            If MoveByClic Then
+                sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+
+            Else
+                sqFrom = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+                DrawMove()
+            End If
         End If
-        
 
 
 
     End Sub
 
     Private Sub PictureBox1_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseUp
-        sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-            + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
-        If sqFrom = sqTo Then
-            MoveByClic = True
+
+        If e.Button = MouseButtons.Right Then
+            mnFrm.Show(Control.MousePosition)
         Else
-            MovebyClic = False
-            DoMove()
-            DrawPiece()
+            sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+            If sqFrom = sqTo Then
+                MoveByClic = True
+            Else
+                MoveByClic = False
+                DoMove()
+                DrawPiece()
+            End If
         End If
-        
+
     End Sub
 
 #End Region
@@ -444,19 +454,13 @@ err:
 
 
 
-    Private Sub lvMoves_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lvMoves.SelectedIndexChanged
 
+
+    Private Sub GetRecToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetRecToolStripMenuItem.Click
+        MsgBox(ThePOS.GetRec)
     End Sub
 
-    Private Sub ContextMenuStrip1_Opening(ByVal sender As System.Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles mnFrm.Opening
-
-    End Sub
-
-    Private Sub mnGetRec_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnGetRec.Click
-        MsgBox(ThePOS.GetRec())
-    End Sub
-
-    Private Sub PictureBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PictureBox1.Click
-
+    Private Sub GetMovesToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetMovesToolStripMenuItem.Click
+        MsgBox(ThePOS.GetMoves(sqFrom))
     End Sub
 End Class

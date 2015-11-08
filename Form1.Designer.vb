@@ -24,41 +24,24 @@ Partial Class frmMain
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmMain))
-        Me.pbReduire = New System.Windows.Forms.PictureBox()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.lvMoves = New System.Windows.Forms.ListView()
         Me.chCoup = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chWhite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chBlack = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
-        Me.mnFrm = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.mnGetRec = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnGetMoves = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem5 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.pbReduire = New System.Windows.Forms.PictureBox()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.mnFrm = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.GetRecToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GetMovesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnFrm.SuspendLayout()
         Me.SuspendLayout()
-        '
-        'pbReduire
-        '
-        Me.pbReduire.BackgroundImage = Global.TestGraphic.My.Resources.Resources.reduire0
-        Me.pbReduire.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
-        Me.pbReduire.Location = New System.Drawing.Point(864, 12)
-        Me.pbReduire.Name = "pbReduire"
-        Me.pbReduire.Size = New System.Drawing.Size(34, 28)
-        Me.pbReduire.TabIndex = 12
-        Me.pbReduire.TabStop = False
-        '
-        'PictureBox1
-        '
-        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
-        Me.PictureBox1.Location = New System.Drawing.Point(12, 12)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(444, 447)
-        Me.PictureBox1.TabIndex = 0
-        Me.PictureBox1.TabStop = False
         '
         'lvMoves
         '
@@ -90,23 +73,17 @@ Partial Class frmMain
         Me.chBlack.Text = "Black"
         Me.chBlack.Width = 100
         '
-        'mnFrm
-        '
-        Me.mnFrm.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnGetRec, Me.ToolStripMenuItem2, Me.ToolStripMenuItem3, Me.ToolStripMenuItem4, Me.ToolStripMenuItem5})
-        Me.mnFrm.Name = "mnFrm"
-        Me.mnFrm.Size = New System.Drawing.Size(184, 114)
-        '
         'mnGetRec
         '
         Me.mnGetRec.Name = "mnGetRec"
         Me.mnGetRec.Size = New System.Drawing.Size(183, 22)
         Me.mnGetRec.Text = "GetRec"
         '
-        'ToolStripMenuItem2
+        'mnGetMoves
         '
-        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
-        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(183, 22)
-        Me.ToolStripMenuItem2.Text = "ToolStripMenuItem2"
+        Me.mnGetMoves.Name = "mnGetMoves"
+        Me.mnGetMoves.Size = New System.Drawing.Size(183, 22)
+        Me.mnGetMoves.Text = "GetMoves"
         '
         'ToolStripMenuItem3
         '
@@ -125,6 +102,43 @@ Partial Class frmMain
         Me.ToolStripMenuItem5.Name = "ToolStripMenuItem5"
         Me.ToolStripMenuItem5.Size = New System.Drawing.Size(183, 22)
         Me.ToolStripMenuItem5.Text = "ToolStripMenuItem5"
+        '
+        'pbReduire
+        '
+        Me.pbReduire.BackgroundImage = Global.TestGraphic.My.Resources.Resources.reduire0
+        Me.pbReduire.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
+        Me.pbReduire.Location = New System.Drawing.Point(864, 12)
+        Me.pbReduire.Name = "pbReduire"
+        Me.pbReduire.Size = New System.Drawing.Size(34, 28)
+        Me.pbReduire.TabIndex = 12
+        Me.pbReduire.TabStop = False
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
+        Me.PictureBox1.Location = New System.Drawing.Point(12, 12)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(444, 447)
+        Me.PictureBox1.TabIndex = 0
+        Me.PictureBox1.TabStop = False
+        '
+        'mnFrm
+        '
+        Me.mnFrm.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.GetRecToolStripMenuItem, Me.GetMovesToolStripMenuItem})
+        Me.mnFrm.Name = "mnFrm"
+        Me.mnFrm.Size = New System.Drawing.Size(128, 48)
+        '
+        'GetRecToolStripMenuItem
+        '
+        Me.GetRecToolStripMenuItem.Name = "GetRecToolStripMenuItem"
+        Me.GetRecToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
+        Me.GetRecToolStripMenuItem.Text = "GetRec"
+        '
+        'GetMovesToolStripMenuItem
+        '
+        Me.GetMovesToolStripMenuItem.Name = "GetMovesToolStripMenuItem"
+        Me.GetMovesToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
+        Me.GetMovesToolStripMenuItem.Text = "GetMoves"
         '
         'frmMain
         '
@@ -150,11 +164,13 @@ Partial Class frmMain
     Friend WithEvents chCoup As System.Windows.Forms.ColumnHeader
     Friend WithEvents chWhite As System.Windows.Forms.ColumnHeader
     Friend WithEvents chBlack As System.Windows.Forms.ColumnHeader
-    Friend WithEvents mnFrm As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents mnGetRec As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ToolStripMenuItem2 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents mnGetMoves As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem3 As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem4 As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem5 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents mnFrm As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents GetRecToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents GetMovesToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 
 End Class
