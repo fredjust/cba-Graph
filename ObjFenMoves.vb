@@ -23,11 +23,25 @@
     'Fen correspondant à un début de partie
     Private Const _IntitFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-    'les direction possible pour le tableau 10x10
+    'le tableau 10x10 de 0 à 99 contient le tableau 8x8 de 11 à 88
+    ' la case 11 est la case a1
+    ' 90 91 92 93 94 95 96 97 98 99     =>      xx xx xx xx xx xx xx xx xx xx 
+    ' 80 81 82 83 84 85 86 87 88 89     =>      xx a8 b8 c8 d8 e8 f8 g8 h8 xx
+    ' 70 71 72 73 74 75 76 77 77 79     =>      xx a7 b7 c7 d7 e7 f7 g7 h7 xx
+    ' 60 61 62 63 64 65 66 67 68 69     =>      xx a6 b6 c6 d6 e6 f6 g6 h6 xx
+    ' 50 51 52 53 54 55 56 57 58 59     =>      xx a5 b5 c5 d5 e5 f5 g5 h5 xx
+    ' 40 41 42 43 44 45 46 47 48 49     =>      xx a4 b4 c4 d4 e4 f4 g4 h4 xx
+    ' 30 31 32 33 34 35 36 37 38 39     =>      xx a3 b3 c3 d3 e3 f3 g3 h3 xx
+    ' 20 21 22 23 24 25 26 27 28 29     =>      xx a2 b2 c2 d2 e2 f2 g2 h2 xx
+    ' 10 11 12 13 14 15 16 17 18 19     =>      xx a1 b1 c1 d1 e1 f1 g1 h1 xx
+    ' 00 01 02 03 04 05 06 07 08 09     =>      xx xx xx xx xx xx xx xx xx xx 
+    Public Board10x10(100) As Char
+
+    'les direction possible pour le tableau 10x10    
     Private Enum dpl As Integer
-        RIGHT = 1
+        RIGHT = 1       'a droite de a1 c'est b1 index 2
         LEFT = -1
-        UP = 10
+        UP = 10         'au dessus de a1 c'est a2 index 11
         DOWN = -10
         UP_LEFT = 9
         DOWN_LEFT = -11
@@ -41,10 +55,11 @@
         Empty = 0
         White = 1
         Black = 2
-        Border = 3
-        OutOfBounds = 4
+        Border = 3      'en dehors de la palce 11-88
+        OutOfBounds = 4 'en dehors de la place 0-99
     End Enum
 
+    'les 6 champs d'un FEN
     'pour simplifier la lecture
     Private Structure SplitFEN
         Dim c1Pieces As String
@@ -71,8 +86,8 @@
     End Structure
 
     Private aFEN As New InfoFEN
-    Private Board10x10(100) As Char            'le champ 1 BOARD de 0 à 99 pour les pieces FEN
 
+    'pour traduire les pièces
     Private _LocalPIECE As String = "RNBQK"
 
 #End Region
@@ -80,8 +95,6 @@
 #Region "Fonctions privées"
 
 #Region "Gestion du tableau et des index"
-
-
 
     '***************************************************************************************
     '               REMPLI Board10x10 A PARTIR DU CHAMP 1 D UN FEN
@@ -136,9 +149,13 @@
 
     End Function
 
-    'renvoie l'INDEX d'une case a partir de son nom
+    'renvoie l'INDEX d'une case a partir de son nom 
+    'SquareIndex(xy)=10*y+x
+    ' exemple :
+    '   SquareIndex(a1)=11
+    '   SquareIndex(h8)=88
     'ou 0 en cas d'erreur
-    Private Function SquareIndex(ByVal sqName As String) As Byte
+    Public Function SquareIndex(ByVal sqName As String) As Byte
         Dim lettre As Char
         Dim colonne As Byte
         Dim ligne As Byte
@@ -160,6 +177,7 @@
 
     'renvoie le nom d'une case sous la forme e2
     'ou un caractère vide en cas d'erreur
+    'SquareName(11)=a1
     Private Function SquareName(ByVal sqIndex As Byte) As String
         Dim lettre As Char
         Dim colonne As Byte
@@ -220,7 +238,8 @@
 
     End Function
 
-    'Contraire de la fonction colorOf
+    'renvoie TRUE si c'est aux blancs de jouer
+    ' FALSE si c'est aux noirs de jouer
     Private Function ToNotPlay() As ColorPiece
 
         Select Case aFEN.ToPlay
@@ -477,8 +496,14 @@
 
     End Function
 
-    ' LocalPIECE =  RNBQR in en
+    'converti les initiales en en local
+    ' LocalPIECE =  RNBQK in en
     '               TCFDR in fr
+    '   R => T
+    '   N => C
+    '   B => F
+    '   Q => D
+    '   K => R
     Private Function ToLocal(ByVal InitialeEN As Char) As Char
         Select Case UCase(InitialeEN)
             Case "R"
@@ -497,9 +522,7 @@
 
     End Function
 
-
-
-    'deplace une piece avec deux noms
+    'deplace une piece avec deux noms a1 h8
     Private Sub MovePiece(ByVal sqFrom As String, ByVal sqTo As String)
         MovePiece(SquareIndex(sqFrom), SquareIndex(sqTo))
     End Sub
@@ -512,10 +535,8 @@
         Board10x10(sqiFrom) = " "
     End Sub
 
-
     'supprime une piece 
     Private Sub RemovePiece(ByVal aSquare)
-
         If TypeOf (aSquare) Is String Then
             Board10x10(SquareIndex(aSquare)) = " "
         Else
@@ -523,8 +544,6 @@
         End If
 
     End Sub
-
-
 
     'vérifie si le déplacement correspond a un roque
     'renvoi la lettre correspondant a ce roque KQkq ou "" dans ThisRoque
@@ -613,6 +632,7 @@
 
     End Sub
 
+    'vérifie s'il s'agit d'une prise en Passant
     Private Function IsEnPassant(ByVal sqiFrom As Byte, ByVal sqiTo As Byte) As Boolean
 
         If aFEN.sqiEnPassant = sqiTo Then       'on arrive sur la case enpassant
@@ -713,57 +733,33 @@
     End Function
 
     ''' <summary>
-    ''' retourne la signature d'un FEN
+    ''' retourne la signature correspondant à l'état actuel
     ''' </summary>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Function GetRec(Optional ByVal posFEN As String = "") As String
-        Dim strFEN As String
-        Dim Champs() As String
-        Dim Lignes() As String
-        Dim LaLigne As String
-        Dim BoardByte(9, 9) As Byte
+    Public Function GetRec() As String
+        Dim colonne As Int16
+        Dim ligne As Int16
+        Dim sqi As Byte
+        Dim oRec As Byte
+        Dim strRec As String
 
-        'si un FEN est passé on l'utilise sinon on prends celui de la position en cours
-        If posFEN = "" Then strFEN = GetFEN() Else strFEN = posFEN
+        strRec = ""
 
-        'récupère les champs
-        Champs = strFEN.Split(" ")
+        For colonne = 1 To 8
+            oRec = 0
+            For ligne = 1 To 8
+                sqi = ligne * 10 + colonne
+                If Board10x10(sqi) <> " " Then
+                    oRec = oRec + 2 ^ (ligne - 1)
+                End If
+            Next
+            strRec = strRec & oRec.ToString & "."
+        Next
+        strRec = strRec.Substring(0, strRec.Length - 1)
 
-        'récupère les lignes
-        Lignes = Champs(0).Split("/")
+        Return strRec
 
-        If lignes.Count <> 8 Then
-            Return "ERR0"
-        End If
-
-        'For NumLigne = 0 To 7
-
-        '    LaLigne = lignes(NumLigne)
-
-        '    LaLigne = LaLigne.Replace("1", " ")
-        '    LaLigne = LaLigne.Replace("2", "  ")
-        '    LaLigne = LaLigne.Replace("3", "   ")
-        '    LaLigne = LaLigne.Replace("4", "    ")
-        '    LaLigne = LaLigne.Replace("5", "     ")
-        '    LaLigne = LaLigne.Replace("6", "      ")
-        '    LaLigne = LaLigne.Replace("7", "       ")
-        '    LaLigne = LaLigne.Replace("8", "        ")
-
-        '    If LaLigne.Length = 8 Then
-        '        For NumCol = 0 To 7
-        '            Board10x10((8 - NumLigne) * 10 + (NumCol + 1)) = LaLigne.Substring(NumCol, 1)
-        '        Next
-        '    Else
-        '        Return "ERR" & NumLigne.ToString
-        '    End If
-
-        'Next
-
-        'Return 0
-
-
-        Return "ERR"
 
     End Function
 
@@ -1223,8 +1219,16 @@
 
             Case "P"                                                    ' SI C EST UN PION *********************************************************************
                 If Board10x10(sqiTO) = " " Then
-                    'SUPPRIMER LA CASE DE DEPART EN CAS DE POUSSE DE PION 
-                    SpecificMove = NameCase2
+                    'gérer la prise en passant
+                    If Board10x10(sqiTO) = " " Then
+                        If IsEnPassant(sqiFROM, sqiTO) Then
+                            SpecificMove = NameCase1.Substring(0, 1) & "x" & NameCase2 & " ep"
+                        Else
+                            'SUPPRIMER LA CASE DE DEPART EN CAS DE POUSSE DE PION 
+                            SpecificMove = NameCase2
+                        End If
+                    End If
+
                 Else
                     'AJOUTER LA COLONNE DE DEPART EN CASE DE PRISE DE PION
                     SpecificMove = NameCase1.Substring(0, 1) & "x" & NameCase2

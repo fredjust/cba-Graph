@@ -33,7 +33,7 @@
 #End Region
 
 
-    Private Board10x10(100) As Char 'pour correspondre avec mon objFenMoves
+    'Private Board10x10(100) As Char 'pour correspondre avec mon objFenMoves
 
     Dim PieceSize As Integer
 
@@ -44,77 +44,6 @@
     Dim sqTo As String
     Dim EffaceNoir As Boolean = False   'une rustine de dernière minute
     Public ThePOS As ObjFenMoves
-
-#Region "fonctions en doubles avec objMoves :-("
-    Private Function ToBoard(ByVal FEN_Champ1 As String) As Byte
-        Dim lignes() As String
-        Dim NumLigne As Integer
-        Dim NumCol As Integer
-        Dim LaLigne As String
-        Dim champs() As String
-
-        champs = FEN_Champ1.Split(" ")
-
-
-        'on place des bords partout
-        For NumLigne = 0 To 99
-            Board10x10(NumLigne) = "*"
-        Next
-
-        lignes = champs(0).Split("/")
-
-        If lignes.Count <> 8 Then
-            Return 10
-        End If
-
-        For NumLigne = 0 To 7
-
-            LaLigne = lignes(NumLigne)
-
-            LaLigne = LaLigne.Replace("1", " ")
-            LaLigne = LaLigne.Replace("2", "  ")
-            LaLigne = LaLigne.Replace("3", "   ")
-            LaLigne = LaLigne.Replace("4", "    ")
-            LaLigne = LaLigne.Replace("5", "     ")
-            LaLigne = LaLigne.Replace("6", "      ")
-            LaLigne = LaLigne.Replace("7", "       ")
-            LaLigne = LaLigne.Replace("8", "        ")
-
-            If LaLigne.Length = 8 Then
-                For NumCol = 0 To 7
-                    Board10x10((8 - NumLigne) * 10 + (NumCol + 1)) = LaLigne.Substring(NumCol, 1)
-                Next
-            Else
-                Return 11 + NumLigne
-            End If
-
-        Next
-
-
-
-        Return 0
-    End Function
-
-    Private Function SquareIndex(ByVal sqName As String) As Byte
-        Dim lettre As Char
-        Dim colonne As Byte
-        Dim ligne As Byte
-
-        If sqName.Length <> 2 Then Return 0
-
-        lettre = sqName.Substring(0, 1) 'recupere la lettre
-        colonne = Asc(lettre) - 96 'recupere le numero de colonne
-
-        If colonne < 1 Or colonne > 8 Then Return 0
-
-        ligne = sqName.Substring(1, 1) 'recupere le numero de ligne
-
-        If ligne < 1 Or ligne > 8 Then Return 0
-
-        Return ligne * 10 + colonne
-
-    End Function
-#End Region
 
 
 #Region "Fonction de dessin"
@@ -260,11 +189,9 @@
 
             PictureBox1.Image = backBuffer
 
-            ToBoard(ThePOS.GetFEN)
-
             Dim LaPiece As Char
             For i = 11 To 88
-                LaPiece = Board10x10(i)
+                LaPiece = ThePOS.Board10x10(i)
                 If LaPiece <> " " And LaPiece <> "*" Then
                     PutPiece(i, LaPiece)
                 End If
@@ -288,16 +215,16 @@
                 sq = sqMoves(i)
                 If sq.Substring(0, 1) <> "x" Then
                     If Not ThePOS.IsValidMove(sqFrom & sq) Then
-                        PutSymbol(SquareIndex(sq), "3")
+                        PutSymbol(ThePOS.SquareIndex(sq), "3")
                     Else
-                        PutSymbol(SquareIndex(sq), "2")
+                        PutSymbol(ThePOS.SquareIndex(sq), "2")
                     End If
                 Else
                     sq = sqMoves(i).Substring(1, 2)
                     If Not ThePOS.IsValidMove(sqFrom & sq) Then
-                        PutSymbol(SquareIndex(sq), "3")
+                        PutSymbol(ThePOS.SquareIndex(sq), "3")
                     Else
-                        PutSymbol(SquareIndex(sq), "4")
+                        PutSymbol(ThePOS.SquareIndex(sq), "4")
                     End If
                 End If
             Next
@@ -309,7 +236,7 @@
             sqMoves = txtCanTake.Split(" ")
             For i = 0 To sqMoves.Count - 1
                 sq = sqMoves(i)
-                PutSymbol(SquareIndex(sq), "1")
+                PutSymbol(ThePOS.SquareIndex(sq), "1")
             Next
         End If
 
@@ -356,6 +283,10 @@
         pbReduire.Top = 10
         ThePOS = New ObjFenMoves()
         ThePOS.LocalPiece = "TCFDR"
+    End Sub
+
+    Private Sub frmMain_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
+        mnFrm.Show()
     End Sub
 
     Private Sub Form1_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
@@ -502,5 +433,13 @@ err:
 
     Private Sub lvMoves_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lvMoves.SelectedIndexChanged
 
+    End Sub
+
+    Private Sub ContextMenuStrip1_Opening(ByVal sender As System.Object, ByVal e As System.ComponentModel.CancelEventArgs) Handles mnFrm.Opening
+
+    End Sub
+
+    Private Sub mnGetRec_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles mnGetRec.Click
+        MsgBox(ThePOS.GetRec())
     End Sub
 End Class

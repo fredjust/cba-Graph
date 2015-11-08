@@ -22,6 +22,7 @@ Partial Class frmMain
     'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmMain))
         Me.pbReduire = New System.Windows.Forms.PictureBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
@@ -29,8 +30,15 @@ Partial Class frmMain
         Me.chCoup = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chWhite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chBlack = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.mnFrm = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.mnGetRec = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripMenuItem5 = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.mnFrm.SuspendLayout()
         Me.SuspendLayout()
         '
         'pbReduire
@@ -79,6 +87,42 @@ Partial Class frmMain
         '
         Me.chBlack.Text = "Black"
         '
+        'mnFrm
+        '
+        Me.mnFrm.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnGetRec, Me.ToolStripMenuItem2, Me.ToolStripMenuItem3, Me.ToolStripMenuItem4, Me.ToolStripMenuItem5})
+        Me.mnFrm.Name = "mnFrm"
+        Me.mnFrm.Size = New System.Drawing.Size(184, 136)
+        '
+        'mnGetRec
+        '
+        Me.mnGetRec.Name = "mnGetRec"
+        Me.mnGetRec.Size = New System.Drawing.Size(183, 22)
+        Me.mnGetRec.Text = "GetRec"
+        '
+        'ToolStripMenuItem2
+        '
+        Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
+        Me.ToolStripMenuItem2.Size = New System.Drawing.Size(183, 22)
+        Me.ToolStripMenuItem2.Text = "ToolStripMenuItem2"
+        '
+        'ToolStripMenuItem3
+        '
+        Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
+        Me.ToolStripMenuItem3.Size = New System.Drawing.Size(183, 22)
+        Me.ToolStripMenuItem3.Text = "ToolStripMenuItem3"
+        '
+        'ToolStripMenuItem4
+        '
+        Me.ToolStripMenuItem4.Name = "ToolStripMenuItem4"
+        Me.ToolStripMenuItem4.Size = New System.Drawing.Size(183, 22)
+        Me.ToolStripMenuItem4.Text = "ToolStripMenuItem4"
+        '
+        'ToolStripMenuItem5
+        '
+        Me.ToolStripMenuItem5.Name = "ToolStripMenuItem5"
+        Me.ToolStripMenuItem5.Size = New System.Drawing.Size(183, 22)
+        Me.ToolStripMenuItem5.Text = "ToolStripMenuItem5"
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -93,6 +137,7 @@ Partial Class frmMain
         Me.Text = "PGN Export"
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.mnFrm.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -102,5 +147,11 @@ Partial Class frmMain
     Friend WithEvents chCoup As System.Windows.Forms.ColumnHeader
     Friend WithEvents chWhite As System.Windows.Forms.ColumnHeader
     Friend WithEvents chBlack As System.Windows.Forms.ColumnHeader
+    Friend WithEvents mnFrm As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents mnGetRec As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem2 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem3 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem4 As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStripMenuItem5 As System.Windows.Forms.ToolStripMenuItem
 
 End Class
