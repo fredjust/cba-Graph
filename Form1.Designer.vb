@@ -78,14 +78,17 @@ Partial Class frmMain
         'chCoup
         '
         Me.chCoup.Text = "n°"
+        Me.chCoup.Width = 40
         '
         'chWhite
         '
         Me.chWhite.Text = "White"
+        Me.chWhite.Width = 100
         '
         'chBlack
         '
         Me.chBlack.Text = "Black"
+        Me.chBlack.Width = 100
         '
         'mnFrm
         '
