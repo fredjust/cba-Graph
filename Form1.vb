@@ -33,7 +33,7 @@
 #End Region
 
 
-    'Private Board10x10(100) As Char 'pour correspondre avec mon objFenMoves
+
 
     Dim PieceSize As Integer
 
@@ -351,10 +351,17 @@
             If sqFrom = sqTo Then
                 MoveByClic = True
             Else
-                MoveByClic = False
-                DoMove()
-                DrawPiece()
+                If ThePOS.IsValidMove(sqFrom & sqTo) Then
+                    MoveByClic = False
+                    DoMove()
+                    DrawPiece()
+                Else
+                    sqFrom = sqTo
+
+                    DrawMove()
+                End If
             End If
+
         End If
 
     End Sub
@@ -402,9 +409,7 @@ err:
 
         If sqFrom <> sqTo Then
 
-            If Not ThePOS.IsValidMove(sqFrom & sqTo) Then
-                'Beep()
-            Else
+            If ThePOS.IsValidMove(sqFrom & sqTo) Then
 
                 deletenextitem()
 
@@ -462,5 +467,9 @@ err:
 
     Private Sub GetMovesToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetMovesToolStripMenuItem.Click
         MsgBox(ThePOS.GetMoves(sqFrom))
+    End Sub
+
+    Private Sub PictureBox1_Click(sender As System.Object, e As System.EventArgs) Handles PictureBox1.Click
+
     End Sub
 End Class
