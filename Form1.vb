@@ -37,9 +37,12 @@
 
     Dim PieceSize As Integer
 
+    'graphic sur la picturebox
+    'je ne comprends pas trop comment cela fonctionne vraiment
     Dim backBuffer As New Bitmap(My.Resources.board90)
     Dim g As Graphics = Graphics.FromImage(backBuffer)
 
+    'variable global quelle horreur
     Dim sqFrom As String
     Dim sqTo As String
     Dim MoveByClic As Boolean
@@ -145,6 +148,8 @@
         Dim rect As Rectangle
         Dim pt As Point
 
+        Debug.Print("DrawPiece")
+
         If Me.WindowState <> FormWindowState.Minimized Then
 
             PictureBox1.Top = 10
@@ -182,11 +187,21 @@
 
             PieceSize = (PictureBox1.Height - 36) / 8
 
-            lvMoves.Top = 50
-            lvMoves.Left = PictureBox1.Left + PictureBox1.Width + 10
+            'With lvMoves
+            '    .Top = 50
+            '    .Left = PictureBox1.Left + PictureBox1.Width + 10
+            '    .Height = Me.ClientSize.Height - lvMoves.Top - 10
+            '    .Width = Me.ClientSize.Width - (PictureBox1.Width + 30)
+            'End With
 
-            lvMoves.Height = Me.ClientSize.Height - lvMoves.Top - 10
-            lvMoves.Width = Me.ClientSize.Width - (PictureBox1.Width + 30)
+            With TabControl1
+                .Top = 10
+                .Left = PictureBox1.Left + PictureBox1.Width + 10
+                .Height = Me.ClientSize.Height - .Top - 10
+                .Width = Me.ClientSize.Width - (PictureBox1.Width + 30)
+            End With
+
+
 
             PictureBox1.Image = backBuffer
 
@@ -200,7 +215,7 @@
         End If
     End Sub
 
-    'place les symboles a partir d'une pièce
+    'place les symboles de déplacement d'une pièce
     Public Sub DrawMove()
 
         Dim sqMoves() As String
@@ -208,6 +223,8 @@
         Dim txtMoves As String
 
         txtMoves = ThePOS.GetMoves(sqFrom)
+        Debug.Print("DrawMove:" & sqFrom)
+
 
         If txtMoves.Length > 0 Then
             sqMoves = txtMoves.Split(" ")
@@ -295,6 +312,7 @@
     Private Sub Form1_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
         Static MustRedraw As Boolean
         pbReduire.Visible = False
+
         Select Case Me.WindowState
             Case FormWindowState.Maximized
                 Me.FormBorderStyle = Windows.Forms.FormBorderStyle.None
@@ -314,21 +332,34 @@
     End Sub
 
     Private Sub Form1_ResizeEnd(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.ResizeEnd
+        Static WindowsSize As Integer
         If Me.WindowState = FormWindowState.Normal Then
-            DrawPiece()
+            If WindowsSize <> Me.Width + Me.Height Then
+                DrawPiece()
+                WindowsSize = Me.Width + Me.Height
+            End If
         End If
     End Sub
+
 #End Region
 
 #Region "Evenement de la picturebox1"
+
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
-
-        If e.Button = MouseButtons.Right Then
-
-        Else
+        Debug.Print("MouseDown:")
+        If e.Button = MouseButtons.Left Then
             If MoveByClic Then
                 sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
                 + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+                If sqFrom <> sqTo Then
+                    If Not ThePOS.IsValidMove(sqFrom & sqTo) Then
+                        sqFrom = sqTo
+                        sqTo = ""
+                        'DrawPiece()
+                        DrawMove()
+                        MoveByClic = False
+                    End If
+                End If
 
             Else
                 sqFrom = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
@@ -336,13 +367,10 @@
                 DrawMove()
             End If
         End If
-
-
-
     End Sub
 
     Private Sub PictureBox1_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseUp
-
+        Debug.Print("MouseUp:")
         If e.Button = MouseButtons.Right Then
             mnFrm.Show(Control.MousePosition)
         Else
@@ -350,15 +378,16 @@
                 + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
             If sqFrom = sqTo Then
                 MoveByClic = True
+                sqTo = ""
             Else
+                MoveByClic = False
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
-                    MoveByClic = False
-                    DoMove()
-                    DrawPiece()
-                Else
-                    sqFrom = sqTo
 
-                    DrawMove()
+
+                    AddMove()
+
+                    DrawPiece()
+
                 End If
             End If
 
@@ -369,8 +398,7 @@
 #End Region
 
 #Region "Evenement listView"
-
-    Private Sub lvMoves_MouseClick(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles lvMoves.MouseClick
+    Private Sub lvMoves_MouseClick1(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles lvMoves.MouseClick
         On Error Resume Next
         If e.X > lvMoves.Columns(0).Width + lvMoves.Columns(2).Width Then
             ThePOS.SetFEN(lvMoves.SelectedItems(0).SubItems(2).Tag)
@@ -382,11 +410,11 @@
             DrawPiece()
         End If
     End Sub
-
 #End Region
 
 #Region "Gestion des mouvements et de la ListView"
 
+    'efface tous les items suivant dans la listview
     Public Sub deletenextitem()
         On Error GoTo err
 
@@ -404,12 +432,15 @@ err:
 
     End Sub
 
-    Private Sub DoMove()
+    'affiche le mouvement dans la listview lvmoves
+    Private Sub AddMove()
         Dim lvi As New ListViewItem
 
         If sqFrom <> sqTo Then
 
             If ThePOS.IsValidMove(sqFrom & sqTo) Then
+
+
 
                 deletenextitem()
 
@@ -426,6 +457,8 @@ err:
                     ThePOS.MakeMove(sqFrom & sqTo)
                     lvi.SubItems(2).Tag = ThePOS.GetFEN()
                 End If
+
+
 
                 lvMoves.Items(lvMoves.Items.Count - 1).Selected = True
 
@@ -469,7 +502,12 @@ err:
         MsgBox(ThePOS.GetMoves(sqFrom))
     End Sub
 
-    Private Sub PictureBox1_Click(sender As System.Object, e As System.EventArgs) Handles PictureBox1.Click
 
+    Private Sub GetFenToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles GetFenToolStripMenuItem.Click
+        MsgBox(ThePOS.GetFEN)
     End Sub
+
+
+
+
 End Class
