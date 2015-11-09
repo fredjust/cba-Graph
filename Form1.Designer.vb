@@ -34,6 +34,7 @@ Partial Class frmMain
         Me.mnFrm = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.GetRecToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GetMovesToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.GetFenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
         Me.lvMoves = New System.Windows.Forms.ListView()
@@ -41,7 +42,7 @@ Partial Class frmMain
         Me.chWhite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chBlack = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.TabPage2 = New System.Windows.Forms.TabPage()
-        Me.GetFenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TabPage3 = New System.Windows.Forms.TabPage()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnFrm.SuspendLayout()
@@ -108,19 +109,26 @@ Partial Class frmMain
         'GetRecToolStripMenuItem
         '
         Me.GetRecToolStripMenuItem.Name = "GetRecToolStripMenuItem"
-        Me.GetRecToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.GetRecToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
         Me.GetRecToolStripMenuItem.Text = "GetRec"
         '
         'GetMovesToolStripMenuItem
         '
         Me.GetMovesToolStripMenuItem.Name = "GetMovesToolStripMenuItem"
-        Me.GetMovesToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.GetMovesToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
         Me.GetMovesToolStripMenuItem.Text = "GetMoves"
+        '
+        'GetFenToolStripMenuItem
+        '
+        Me.GetFenToolStripMenuItem.Name = "GetFenToolStripMenuItem"
+        Me.GetFenToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
+        Me.GetFenToolStripMenuItem.Text = "GetFen"
         '
         'TabControl1
         '
         Me.TabControl1.Controls.Add(Me.TabPage1)
         Me.TabControl1.Controls.Add(Me.TabPage2)
+        Me.TabControl1.Controls.Add(Me.TabPage3)
         Me.TabControl1.Location = New System.Drawing.Point(484, 12)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
@@ -135,7 +143,7 @@ Partial Class frmMain
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
         Me.TabPage1.Size = New System.Drawing.Size(315, 326)
         Me.TabPage1.TabIndex = 0
-        Me.TabPage1.Text = "TabPage1"
+        Me.TabPage1.Text = "Formulaire"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
         'lvMoves
@@ -179,11 +187,15 @@ Partial Class frmMain
         Me.TabPage2.Text = "TabPage2"
         Me.TabPage2.UseVisualStyleBackColor = True
         '
-        'GetFenToolStripMenuItem
+        'TabPage3
         '
-        Me.GetFenToolStripMenuItem.Name = "GetFenToolStripMenuItem"
-        Me.GetFenToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
-        Me.GetFenToolStripMenuItem.Text = "GetFen"
+        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Name = "TabPage3"
+        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage3.Size = New System.Drawing.Size(315, 326)
+        Me.TabPage3.TabIndex = 2
+        Me.TabPage3.Text = "TabPage3"
+        Me.TabPage3.UseVisualStyleBackColor = True
         '
         'frmMain
         '
@@ -196,7 +208,7 @@ Partial Class frmMain
         Me.MinimumSize = New System.Drawing.Size(768, 480)
         Me.Name = "frmMain"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "PGN Export"
+        Me.Text = "ChessboARDuino VB"
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.mnFrm.ResumeLayout(False)
@@ -223,5 +235,6 @@ Partial Class frmMain
     Friend WithEvents chWhite As System.Windows.Forms.ColumnHeader
     Friend WithEvents chBlack As System.Windows.Forms.ColumnHeader
     Friend WithEvents GetFenToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents TabPage3 As System.Windows.Forms.TabPage
 
 End Class

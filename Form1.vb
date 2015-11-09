@@ -382,10 +382,7 @@
             Else
                 MoveByClic = False
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
-
-
                     AddMove()
-
                     DrawPiece()
 
                 End If

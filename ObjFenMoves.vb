@@ -1090,6 +1090,10 @@
         Dim CheckSquare As String = ""
 
         'recoi un mouvement du type e2e4
+        If FromTo.Length <> 4 Then
+            Return False
+        End If
+
         FromSquare = FromTo.Substring(0, 2)  'converti e2 en 25
         ToSquare = FromTo.Substring(2, 2)
 
