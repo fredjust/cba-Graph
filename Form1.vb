@@ -346,43 +346,56 @@
 #Region "Evenement de la picturebox1"
 
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
-        Debug.Print("MouseDown:")
-        If e.Button = MouseButtons.Left Then
-            If MoveByClic Then
-                sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
-                If sqFrom <> sqTo Then
-                    If Not ThePOS.IsValidMove(sqFrom & sqTo) Then
-                        sqFrom = sqTo
-                        sqTo = ""
-                        'DrawPiece()
-                        DrawMove()
-                        MoveByClic = False
-                    End If
-                End If
+        Dim sqI As String
 
-            Else
-                sqFrom = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+        If e.Button = MouseButtons.Left Then
+
+            
+
+            'récupère le nom de la case sur lequel le curseur se trouve
+            sqI = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+                    + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+
+            Debug.Print("MouseUp: " & sqI & "-" & sqFrom & "-" & sqTo)
+
+            If sqFrom = "" Then
+                sqFrom = sqI
                 DrawMove()
+            Else
+                If sqFrom <> sqI Then
+                    sqTo = sqFrom
+                End If
             End If
+          
         End If
     End Sub
 
     Private Sub PictureBox1_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseUp
-        Debug.Print("MouseUp:")
+        Dim sqI As String
+
+
         If e.Button = MouseButtons.Right Then
             mnFrm.Show(Control.MousePosition)
         Else
-            sqTo = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
-            If sqFrom = sqTo Then
-                MoveByClic = True
-                sqTo = ""
-            Else
-                MoveByClic = False
+
+            'récupère le nom de la case sur lequel le curseur se trouve
+            sqI = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+                    + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+
+            Debug.Print("MouseUp: " & sqI & "-" & sqFrom & "-" & sqTo)
+
+            'si on a changé de case depuis mousedown
+            'déplacement par drag&drop
+            If sqI <> sqFrom Then
+                sqTo = sqI
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
                     AddMove()
+                    DrawPiece()
+                    sqFrom = ""
+                    sqTo = ""
+                Else
+                    sqFrom = ""
+                    sqTo = ""
                     DrawPiece()
 
                 End If
@@ -507,4 +520,7 @@ err:
 
 
 
+    Private Sub PictureBox1_Click(sender As System.Object, e As System.EventArgs) Handles PictureBox1.Click
+
+    End Sub
 End Class
