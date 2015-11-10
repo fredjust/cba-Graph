@@ -21,7 +21,7 @@
 #Region "Déclaration des variables"
 
     'Fen correspondant à un début de partie
-    Private Const _IntitFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    Private Const IntitFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
     'le tableau 10x10 de 0 à 99 contient le tableau 8x8 de 11 à 88
     ' la case 11 est la case a1
@@ -668,7 +668,7 @@
 
 #Region "Fonctions publiques"
 
-    Sub New(Optional ByVal InitFen As String = _IntitFEN)
+    Sub New(Optional ByVal InitFen As String = IntitFEN)
         SetFEN(InitFen)
     End Sub
 
@@ -775,37 +775,46 @@
         Dim TempoRec As String = ""
         Dim BackupFen As String
 
-
-        If ColorOf(SquareIndex(strSquare)) = aFEN.ToPlay Then
-            strTempo = GetMoves(strSquare)
-            CanGo = Split(strTempo, " ")
-
-            For i = 0 To CanGo.Count - 1
-                If CanGo(i).Substring(0, 1) = "x" Then
-                    strTempo = CanGo(i).Substring(1, 2)
-                Else
-                    strTempo = CanGo(i)
+        If strSquare.Length = 2 Then
+            If ColorOf(SquareIndex(strSquare)) = aFEN.ToPlay Then
+                strTempo = GetMoves(strSquare)
+                If strTempo <> "" Then
+                    CanGo = Split(strTempo, " ")
+                    For i = 0 To CanGo.Count - 1
+                        If CanGo(i).Substring(0, 1) = "x" Then
+                            strTempo = CanGo(i).Substring(1, 2)
+                        Else
+                            strTempo = CanGo(i)
+                        End If
+                        BackupFen = GetFEN()
+                        MakeMove(strSquare & strTempo)
+                        TempoRec = TempoRec & "|" & GetRec() & " " & strSquare & strTempo
+                        SetFEN(BackupFen)
+                    Next
+                    Return Trim(TempoRec.Substring(1))
                 End If
-                BackupFen = GetFEN()
-                MakeMove(strSquare & strTempo)
-                TempoRec = TempoRec & vbCrLf & GetRec()
-                SetFEN(BackupFen)
-            Next
-        Else
-            strTempo = WhoCanTake(strSquare)
-            CanFrom = Split(strTempo, " ")
+                Return ""
+            Else
+                strTempo = WhoCanTake(strSquare)
+                CanFrom = Split(strTempo, " ")
+                If strTempo <> "" Then
+                    For i = 0 To CanFrom.Count - 1
+                        strTempo = CanFrom(i)
 
-            For i = 0 To CanFrom.Count - 1
-                strTempo = CanFrom(i)
+                        BackupFen = GetFEN()
+                        MakeMove(strTempo & strSquare)
+                        TempoRec = TempoRec & "|" & GetRec() & " " & strTempo & strSquare
+                        SetFEN(BackupFen)
 
-                BackupFen = GetFEN()
-                MakeMove(strTempo & strSquare)
-                TempoRec = TempoRec & vbCrLf & GetRec()
-                SetFEN(BackupFen)
-            Next
+                    Next
+                    Return Trim(TempoRec.Substring(1))
+                End If
+            End If
+
         End If
 
-        Return TempoRec
+
+        Return ""
     End Function
 
     '****************************************************************************
@@ -894,6 +903,10 @@
         Dim sqiFROM As Int16
         Dim sqiTO As Int16
         Dim ThisRoque As Char = ""
+
+        If FromTo.Length <> 4 Then
+            Return 1
+        End If
 
         'recoi un mouvement du type e2e4
         sqNameFROM = FromTo.Substring(0, 2)

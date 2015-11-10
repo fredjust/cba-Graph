@@ -49,6 +49,13 @@
     Dim EffaceNoir As Boolean = False   'une rustine de dernière minute
     Public ThePOS As ObjFenMoves
 
+    Public Const lv_num As Byte = 0
+    Public Const lv_rec As Byte = 1
+    Public Const lv_time As Byte = 2
+    Public Const lv_off As Byte = 3
+    Public Const lv_on As Byte = 4
+    Public Const lv_FEN As Byte = 5
+
 
 #Region "Fonction de dessin"
 
@@ -520,5 +527,171 @@ err:
 
     Private Sub GetAllRecToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles GetAllRecToolStripMenuItem.Click
         MsgBox(ThePOS.GetRecs(sqFrom))
+    End Sub
+
+    Private Sub LoadToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles LoadToolStripMenuItem.Click
+
+        Dim nomfichier As String = ""
+
+        With OpenFileDialog1
+            'On spécifie l'extension de fichiers visibles
+            .FileName = ""
+            .Filter = "ARD Files (*.ard) | *.ard"
+            'On affiche et teste le retour du dialogue
+            If .ShowDialog = Windows.Forms.DialogResult.OK Then
+                'On récupère le nom du fichier
+                nomfichier = .FileName
+            End If
+        End With
+
+
+        Dim RecTempo() As String
+        Dim RecordsInFile As String
+
+        On Error GoTo ErrorHandler
+
+        RecordsInFile = My.Computer.FileSystem.ReadAllText(nomfichier)
+
+        RecTempo = RecordsInFile.Split(Chr(10) + Chr(13))
+
+        Dim i As Integer = 0
+        Dim j As Integer = 0
+        Dim NewLine As String
+        Dim LastLine As String
+        Dim sqOn As String = ""
+        Dim sqOff As String = ""
+
+        LastLine = RecTempo(j).Substring(0, RecTempo(j).Length - 2)
+        lvRec.Items.Add(i)
+        lvRec.Items(i).SubItems.Add(LastLine)
+        lvRec.Items(i).SubItems.Add(RecTempo(j + 1))
+        lvRec.Items(i).SubItems.Add(sqOff)
+        lvRec.Items(i).SubItems.Add(sqOn)
+        lvRec.Items(i).SubItems.Add("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        j = j + 2
+        i = i + 1
+
+        While j < RecTempo.Length - 2
+            lvRec.Items.Add(i)
+            NewLine = RecTempo(j).Substring(0, RecTempo(j).Length - 2)
+            lvRec.Items(i).SubItems.Add(NewLine)
+            lvRec.Items(i).SubItems.Add(RecTempo(j + 1))
+            FindOnOff(NewLine, LastLine, sqOn, sqOff)
+            lvRec.Items(i).SubItems.Add(sqOff)
+            lvRec.Items(i).SubItems.Add(sqOn)
+            lvRec.Items(i).SubItems.Add("")
+            
+            LastLine = NewLine
+            j = j + 2
+            i = i + 1
+        End While
+
+        Exit Sub
+ErrorHandler:
+
+        MsgBox("Error in LoadRecords : " & vbCrLf & Err.Description)
+
+
+
+    End Sub
+
+    ' cherche les cases qui s'allument et s'éteingnent entre deux enregistrement
+    Private Sub FindOnOff(ByVal new_line As String, ByVal last_line As String, ByRef SquareOn As String, ByRef SquareOff As String)
+        Dim ligne As Integer
+        Dim colonne As Byte
+
+        Dim new_pos(9) As String
+        Dim last_pos(9) As String
+
+        Dim last_byte As Byte
+        Dim new_byte As Byte
+
+        SquareOff = ""
+        SquareOn = ""
+
+        last_pos = Split(new_line, ".") 'recupère les 8 bytes de la positions précedente
+        new_pos = Split(last_line, ".") 'récupère les 8 bytes de la position 
+
+        For colonne = 1 To 8
+            new_byte = new_pos(colonne - 1) 'bytes des colonnes
+            last_byte = last_pos(colonne - 1)
+            If (new_byte <> last_byte) Then 'si les deux colonnes sont différentes
+                For ligne = 7 To 0 Step -1
+                    If (new_byte And (2 ^ ligne)) <> (last_byte And (2 ^ ligne)) Then   'si la case est diffétente
+                        If (new_byte And (2 ^ ligne)) Then  's'il s'agit d'une extinction
+                            SquareOff = Chr(96 + colonne) & (ligne + 1).ToString
+                        Else
+                            SquareOn = Chr(96 + colonne) & (ligne + 1).ToString
+                        End If
+                    End If
+                Next
+
+            End If
+        Next
+
+    End Sub
+
+    Private Sub lvRec_ItemSelectionChanged(sender As Object, e As System.Windows.Forms.ListViewItemSelectionChangedEventArgs) Handles lvRec.ItemSelectionChanged
+        Dim aFen As String
+        If e.IsSelected Then
+            aFen = lvRec.SelectedItems.Item(0).SubItems(lv_FEN).Text
+            If aFen <> "" Then
+                ThePOS.SetFEN(aFen)
+                DrawPiece()
+
+            End If
+        End If
+    End Sub
+
+
+    Private Sub lvRec_MouseUp(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles lvRec.MouseUp
+        If e.Button = MouseButtons.Right Then
+            mnLv.Show(Control.MousePosition)
+        End If
+
+    End Sub
+
+
+    Private Sub lvRec_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles lvRec.SelectedIndexChanged
+        
+    End Sub
+
+    Private Sub AddLineToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles mniFindRec.Click
+
+        Dim idep As Integer
+        Dim RecPossibles As String()
+        Dim LesRecs As String
+        Dim imax As Integer
+        Dim sqFrom As String
+        Dim sqTo As String
+        Dim LeCoup As String()
+        Dim OnJoue As String
+
+        sqFrom = lvRec.SelectedItems.Item(0).SubItems(lv_off).Text
+        LesRecs = ThePOS.GetRecs(sqFrom)
+
+        RecPossibles = LesRecs.Split("|")
+
+        idep = lvRec.SelectedItems.Item(0).Index
+        For c = 0 To RecPossibles.Count - 1
+            'MsgBox(RecPossibles(c))
+            LeCoup = RecPossibles(c).Split(" ")
+            For i = 1 To 10
+                If lvRec.Items(idep + i).SubItems(lv_rec).Text = LeCoup(0) Then
+                    lvRec.Items(idep + imax).ForeColor = Color.Green
+                    If i >= imax Then
+                        imax = i
+                        OnJoue = LeCoup(1)
+                    End If
+
+                End If
+            Next
+        Next
+        lvRec.Items(idep + imax).ForeColor = Color.Blue
+        sqTo = lvRec.Items(idep + imax).SubItems(lv_on).Text
+        If ThePOS.IsValidMove(OnJoue) Then
+            ThePOS.MakeMove(OnJoue)
+        End If
+        lvRec.Items(idep + imax).SubItems(lv_FEN).Text = ThePOS.GetFEN
     End Sub
 End Class
