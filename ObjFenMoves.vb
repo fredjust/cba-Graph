@@ -763,6 +763,37 @@
 
     End Function
 
+    ''' <summary>
+    ''' retourne toutes les signatures possibles après le soulevement d'une pièce
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetRecs(ByVal strSquare As String) As String
+        Dim strTempo As String
+        Dim CanGo() As String
+        Dim TempoRec As String = ""
+        Dim BackupFen As String
+
+
+        If ColorOf(SquareIndex(strSquare)) = aFEN.ToPlay Then
+            strTempo = GetMoves(strSquare)
+            CanGo = Split(strTempo, " ")
+
+            For i = 0 To CanGo.Count - 1
+                If CanGo(i).Substring(0, 1) = "x" Then
+                    strTempo = CanGo(i).Substring(1, 2)
+                Else
+                    strTempo = CanGo(i)
+                End If
+                BackupFen = GetFEN()
+                MakeMove(strSquare & strTempo)
+                TempoRec = TempoRec & vbCrLf & GetRec()
+                SetFEN(BackupFen)
+            Next
+        End If
+        Return TempoRec
+    End Function
+
     '****************************************************************************
     '           REMPLIT VARIABLE aFEN A PARTIR D UN STRING FEN
     '----------------------------------------------------------------------------
@@ -1294,6 +1325,7 @@
     Public Function WhiteToPlay() As Boolean
         Return aFEN.ToPlay = ColorPiece.White
     End Function
+
 
 #End Region
 

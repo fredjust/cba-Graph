@@ -518,9 +518,7 @@ err:
     End Sub
 
 
-
-
-    Private Sub PictureBox1_Click(sender As System.Object, e As System.EventArgs) Handles PictureBox1.Click
-
+    Private Sub GetAllRecToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles GetAllRecToolStripMenuItem.Click
+        MsgBox(ThePOS.GetRecs(sqFrom))
     End Sub
 End Class

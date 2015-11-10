@@ -43,6 +43,7 @@ Partial Class frmMain
         Me.chBlack = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.GetAllRecToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnFrm.SuspendLayout()
@@ -102,26 +103,26 @@ Partial Class frmMain
         '
         'mnFrm
         '
-        Me.mnFrm.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.GetRecToolStripMenuItem, Me.GetMovesToolStripMenuItem, Me.GetFenToolStripMenuItem})
+        Me.mnFrm.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.GetRecToolStripMenuItem, Me.GetAllRecToolStripMenuItem, Me.GetMovesToolStripMenuItem, Me.GetFenToolStripMenuItem})
         Me.mnFrm.Name = "mnFrm"
-        Me.mnFrm.Size = New System.Drawing.Size(128, 70)
+        Me.mnFrm.Size = New System.Drawing.Size(153, 114)
         '
         'GetRecToolStripMenuItem
         '
         Me.GetRecToolStripMenuItem.Name = "GetRecToolStripMenuItem"
-        Me.GetRecToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
+        Me.GetRecToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.GetRecToolStripMenuItem.Text = "GetRec"
         '
         'GetMovesToolStripMenuItem
         '
         Me.GetMovesToolStripMenuItem.Name = "GetMovesToolStripMenuItem"
-        Me.GetMovesToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
+        Me.GetMovesToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.GetMovesToolStripMenuItem.Text = "GetMoves"
         '
         'GetFenToolStripMenuItem
         '
         Me.GetFenToolStripMenuItem.Name = "GetFenToolStripMenuItem"
-        Me.GetFenToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
+        Me.GetFenToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.GetFenToolStripMenuItem.Text = "GetFen"
         '
         'TabControl1
@@ -197,6 +198,12 @@ Partial Class frmMain
         Me.TabPage3.Text = "TabPage3"
         Me.TabPage3.UseVisualStyleBackColor = True
         '
+        'GetAllRecToolStripMenuItem
+        '
+        Me.GetAllRecToolStripMenuItem.Name = "GetAllRecToolStripMenuItem"
+        Me.GetAllRecToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.GetAllRecToolStripMenuItem.Text = "Get All Rec"
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -236,5 +243,6 @@ Partial Class frmMain
     Friend WithEvents chBlack As System.Windows.Forms.ColumnHeader
     Friend WithEvents GetFenToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents TabPage3 As System.Windows.Forms.TabPage
+    Friend WithEvents GetAllRecToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 
 End Class
