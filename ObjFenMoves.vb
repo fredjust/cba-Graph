@@ -771,6 +771,7 @@
     Public Function GetRecs(ByVal strSquare As String) As String
         Dim strTempo As String
         Dim CanGo() As String
+        Dim CanFrom() As String
         Dim TempoRec As String = ""
         Dim BackupFen As String
 
@@ -790,7 +791,20 @@
                 TempoRec = TempoRec & vbCrLf & GetRec()
                 SetFEN(BackupFen)
             Next
+        Else
+            strTempo = WhoCanTake(strSquare)
+            CanFrom = Split(strTempo, " ")
+
+            For i = 0 To CanFrom.Count - 1
+                strTempo = CanFrom(i)
+
+                BackupFen = GetFEN()
+                MakeMove(strTempo & strSquare)
+                TempoRec = TempoRec & vbCrLf & GetRec()
+                SetFEN(BackupFen)
+            Next
         End If
+
         Return TempoRec
     End Function
 
