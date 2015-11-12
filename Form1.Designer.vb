@@ -49,6 +49,7 @@ Partial Class frmMain
         Me.ColumnHeader3 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ColumnHeader4 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ColumnHeader5 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader6 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ssRec = New System.Windows.Forms.StatusStrip()
         Me.sslbl1 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
@@ -59,7 +60,8 @@ Partial Class frmMain
         Me.DelLineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.FindNextToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-        Me.ColumnHeader6 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader7 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnFrm.SuspendLayout()
@@ -217,9 +219,11 @@ Partial Class frmMain
         '
         'lvRec
         '
-        Me.lvRec.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.ColumnHeader1, Me.ColumnHeader2, Me.ColumnHeader3, Me.ColumnHeader4, Me.ColumnHeader5, Me.ColumnHeader6})
+        Me.lvRec.BackColor = System.Drawing.Color.Black
+        Me.lvRec.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.ColumnHeader1, Me.ColumnHeader2, Me.ColumnHeader3, Me.ColumnHeader4, Me.ColumnHeader5, Me.ColumnHeader6, Me.ColumnHeader7})
         Me.lvRec.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvRec.Font = New System.Drawing.Font("Linux Biolinum G", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lvRec.ForeColor = System.Drawing.Color.White
         Me.lvRec.FullRowSelect = True
         Me.lvRec.GridLines = True
         Me.lvRec.Location = New System.Drawing.Point(3, 3)
@@ -253,6 +257,10 @@ Partial Class frmMain
         Me.ColumnHeader5.Text = "On"
         Me.ColumnHeader5.Width = 30
         '
+        'ColumnHeader6
+        '
+        Me.ColumnHeader6.Text = "FEN"
+        '
         'ssRec
         '
         Me.ssRec.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.sslbl1})
@@ -280,25 +288,25 @@ Partial Class frmMain
         '
         'mnLv
         '
-        Me.mnLv.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.LoadToolStripMenuItem, Me.ToolStripMenuItem1, Me.mniFindRec, Me.DelLineToolStripMenuItem, Me.FindNextToolStripMenuItem})
+        Me.mnLv.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FindNextToolStripMenuItem, Me.ToolStripMenuItem1, Me.LoadToolStripMenuItem, Me.DelLineToolStripMenuItem, Me.mniFindRec, Me.TestToolStripMenuItem})
         Me.mnLv.Name = "mnLv"
-        Me.mnLv.Size = New System.Drawing.Size(153, 120)
+        Me.mnLv.Size = New System.Drawing.Size(153, 142)
         '
         'LoadToolStripMenuItem
         '
         Me.LoadToolStripMenuItem.Name = "LoadToolStripMenuItem"
-        Me.LoadToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.LoadToolStripMenuItem.Size = New System.Drawing.Size(124, 22)
         Me.LoadToolStripMenuItem.Text = "Load ..."
         '
         'ToolStripMenuItem1
         '
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(149, 6)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(121, 6)
         '
         'mniFindRec
         '
         Me.mniFindRec.Name = "mniFindRec"
-        Me.mniFindRec.Size = New System.Drawing.Size(152, 22)
+        Me.mniFindRec.Size = New System.Drawing.Size(124, 22)
         Me.mniFindRec.Text = "Find Rec"
         '
         'DelLineToolStripMenuItem
@@ -313,9 +321,15 @@ Partial Class frmMain
         Me.FindNextToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.FindNextToolStripMenuItem.Text = "Find Next"
         '
-        'ColumnHeader6
+        'ColumnHeader7
         '
-        Me.ColumnHeader6.Text = "FEN"
+        Me.ColumnHeader7.Text = "Nb"
+        '
+        'TestToolStripMenuItem
+        '
+        Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
+        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.TestToolStripMenuItem.Text = "test"
         '
         'frmMain
         '
@@ -378,5 +392,7 @@ Partial Class frmMain
     Friend WithEvents ssRec As System.Windows.Forms.StatusStrip
     Friend WithEvents sslbl1 As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents ColumnHeader6 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader7 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents TestToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 
 End Class
