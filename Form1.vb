@@ -55,6 +55,7 @@
     Public Const lv_off As Byte = 3
     Public Const lv_on As Byte = 4
     Public Const lv_FEN As Byte = 5
+    Public Const lv_Nb As Byte = 6
 
 
 #Region "Fonction de dessin"
@@ -699,7 +700,6 @@ ErrorHandler:
     'dans les lignes non déjà rejetées
     'relativement à l'index iLigne 
     'lorsque la case sqLift disparait
-    'dans la position aFEN
     Private Function indexNextRec(idep As Integer, sqLift As String, ByRef uci_move As String) As Byte
         Dim LesRecs As String
         Dim RecPossibles As String()
@@ -737,45 +737,86 @@ ErrorHandler:
         Return iMin 'on a rien trouvé
     End Function
 
-
-    'cherche une correspondance dans les signatures suivantes
-    Private Sub AddLineToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles mniFindRec.Click
-
-        Dim idep As Integer
-        Dim RecPossibles As String()
+    'renvoi l'index de la première ligne correspondant a une signature possible 
+    'dans les lignes non déjà rejetées
+    'relativement à l'index iLigne 
+    Private Function indexNextAllRec(idep As Integer, ByRef uci_move As String) As Byte
         Dim LesRecs As String
-        Dim imax As Integer
-        Dim sqFrom As String
-        Dim sqTo As String
+        Dim RecPossibles As String()
         Dim LeCoup As String()
-        Dim OnJoue As String
+        Dim iMin As Byte = 255
 
-        sqFrom = lvRec.SelectedItems.Item(0).SubItems(lv_off).Text 'récupère la case qui s'éteint
-        LesRecs = ThePOS.GetRecs(sqFrom) 'récupère les signatures possibles forme : 195.195...195 a1h8|195.195...195 a1h8
-
-        RecPossibles = LesRecs.Split("|")
-        idep = lvRec.SelectedItems.Item(0).Index 'ligne de départ
+        LesRecs = ThePOS.GetAllRecs()  'récupère les signatures possibles forme : 195.195...195 a1h8|195.195...195 a1h8
+        RecPossibles = LesRecs.Split("|") 'sépare le rec
 
         For c = 0 To RecPossibles.Count - 1 'pour chaque signature possible
-            LeCoup = RecPossibles(c).Split(" ")
-            For i = 1 To 10 'cherche dans les 10 signatures suivantes
-                If lvRec.Items(idep + i).SubItems(lv_rec).Text = LeCoup(0) Then
-                    lvRec.Items(idep + imax).ForeColor = Color.Green
-                    If i >= imax Then
-                        imax = i
-                        OnJoue = LeCoup(1)
+            LeCoup = RecPossibles(c).Split(" ") 'sépare la signature du coup
+            For i = 0 To 20 'cherche dans les signatures suivantes
+                If Convert.ToByte(lvRec.Items(idep + i).SubItems(lv_Nb).Text) >= Convert.ToByte(lvRec.Items(idep + i).SubItems(lv_Nb).Text) Then 'si le nombre de pièce n'augmente pas 
+                    If lvRec.Items(idep + i).SubItems(lv_rec).Text = LeCoup(0) Then 'si la signature correspond
+                        If lvRec.Items(idep + i).ForeColor <> Color.Red Then 'si la ligne n'a pas été rejeté
+                            lvRec.Items(idep + i).ForeColor = Color.Aqua
+                            lvRec.Items(idep + i).SubItems(lv_FEN).Text = LeCoup(1)
+                            If lvRec.Items(idep + i).SubItems(lv_on).Text = LeCoup(1).Substring(2, 2) Then 'si la case d'arrivé du coup est celle qui vient de s'allumer
+                                If i < iMin Then
+                                    uci_move = LeCoup(1)
+                                    iMin = i
+                                End If
+                            Else
+                                If LeCoup(1) = "e1g1" Or LeCoup(1) = "e8g8" Then
+                                    If i < iMin Then
+                                        uci_move = LeCoup(1)
+                                        iMin = i
+                                    End If
+                                End If
+                            End If
+                        End If
                     End If
-
                 End If
             Next
         Next
-        lvRec.Items(idep + imax).ForeColor = Color.Blue
-        sqTo = lvRec.Items(idep + imax).SubItems(lv_on).Text
-        If ThePOS.IsValidMove(OnJoue) Then
-            ThePOS.MakeMove(OnJoue)
-        End If
-        lvRec.Items(idep + imax).SubItems(lv_FEN).Text = ThePOS.GetFEN
-    End Sub
+        Return iMin 'on a rien trouvé
+    End Function
+
+
+    'cherche une correspondance dans les signatures suivantes
+    'Private Sub AddLineToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles mniFindRec.Click
+
+    '    Dim idep As Integer
+    '    Dim RecPossibles As String()
+    '    Dim LesRecs As String
+    '    Dim imax As Integer
+    '    Dim sqFrom As String
+    '    Dim sqTo As String
+    '    Dim LeCoup As String()
+    '    Dim OnJoue As String
+
+    '    sqFrom = lvRec.SelectedItems.Item(0).SubItems(lv_off).Text 'récupère la case qui s'éteint
+    '    LesRecs = ThePOS.GetRecs(sqFrom) 'récupère les signatures possibles forme : 195.195...195 a1h8|195.195...195 a1h8
+
+    '    RecPossibles = LesRecs.Split("|")
+    '    idep = lvRec.SelectedItems.Item(0).Index 'ligne de départ
+
+    '    For c = 0 To RecPossibles.Count - 1 'pour chaque signature possible
+    '        LeCoup = RecPossibles(c).Split(" ")
+    '        For i = 1 To 10 'cherche dans les 10 signatures suivantes
+    '            If lvRec.Items(idep + i).SubItems(lv_rec).Text = LeCoup(0) Then
+    '                lvRec.Items(idep + imax).ForeColor = Color.Green
+    '                If i >= imax Then
+    '                    imax = i
+    '                    OnJoue = LeCoup(1)
+    '                End If
+
+    '            End If
+    '        Next
+    '    Next
+    '    lvRec.Items(idep + imax).ForeColor = Color.Blue
+    '    sqTo = lvRec.Items(idep + imax).SubItems(lv_on).Text
+    '    If ThePOS.IsValidMove(OnJoue) Then
+    '        ThePOS.MakeMove(OnJoue)
+    '    End If
+    '    lvRec.Items(idep + imax).SubItems(lv_FEN).Text = ThePOS.GetFEN
+    'End Sub
 
     Private Sub FindNextToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles FindNextToolStripMenuItem.Click
         Dim LeSuivant As Byte
@@ -786,12 +827,8 @@ ErrorHandler:
         idep = lvRec.SelectedItems.Item(0).Index + 1 'ligne de départ
         sqfrom = lvRec.Items(idep).SubItems(lv_off).Text 'récupère la case qui s'éteint
 
-        'For l = 0 To 10
-        '    lvRec.Items(idep + l).ForeColor = Color.White
-        '    lvRec.Items(idep + l).SubItems(lv_FEN).Text = ""
-        'Next
-
-        LeSuivant = indexNextRec(idep, sqfrom, lecoup)
+        'LeSuivant = indexNextRec(idep, sqfrom, lecoup)
+        LeSuivant = indexNextAllRec(idep, lecoup)
         If LeSuivant <> 255 Then
             lvRec.Items(idep + LeSuivant).ForeColor = Color.Green
             If ThePOS.IsValidMove(lecoup) Then
@@ -810,10 +847,10 @@ ErrorHandler:
 
 
 
-        idep = lvRec.SelectedItems.Item(0).Index + 1 'ligne de départ
+        idep = lvRec.SelectedItems.Item(0).Index 'ligne de départ
 
 
-        For l = 0 To 10
+        For l = 0 To 20
             lvRec.Items(idep + l).ForeColor = Color.White
             lvRec.Items(idep + l).SubItems(lv_FEN).Text = ""
         Next

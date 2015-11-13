@@ -238,8 +238,7 @@
 
     End Function
 
-    'renvoie TRUE si c'est aux blancs de jouer
-    ' FALSE si c'est aux noirs de jouer
+    'renvoie la couleur opposée a ToPlay
     Private Function ToNotPlay() As ColorPiece
 
         Select Case aFEN.ToPlay
@@ -777,7 +776,7 @@
 
         If strSquare.Length = 2 Then
             If ColorOf(SquareIndex(strSquare)) = aFEN.ToPlay Then
-                strTempo = GetMoves(strSquare)
+                strTempo = GetValidMoves(strSquare)
                 If strTempo <> "" Then
                     CanGo = Split(strTempo, " ")
                     For i = 0 To CanGo.Count - 1
@@ -813,8 +812,25 @@
 
         End If
 
-
         Return ""
+    End Function
+
+    ''' <summary>
+    ''' retourne toutes les signatures possibles après un coup legal
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetAllRecs() As String
+        Dim tempo As String = ""
+
+        For iSquare = 11 To 88
+            If ColorOf(iSquare) = aFEN.ToPlay Then
+                tempo = tempo & "|" & GetRecs(SquareName(iSquare))
+            End If
+        Next
+
+        Return Trim(tempo.Substring(1))
+
     End Function
 
     '****************************************************************************
