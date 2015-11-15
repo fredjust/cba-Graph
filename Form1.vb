@@ -156,7 +156,7 @@
         Dim rect As Rectangle
         Dim pt As Point
 
-        Debug.Print("DrawPiece")
+        'Debug.Print("DrawPiece")
 
         If Me.WindowState <> FormWindowState.Minimized Then
 
@@ -231,7 +231,7 @@
         Dim txtMoves As String
 
         txtMoves = ThePOS.GetMoves(sqFrom)
-        Debug.Print("DrawMove:" & sqFrom)
+        'Debug.Print("DrawMove:" & sqFrom)
 
 
         If txtMoves.Length > 0 Then
@@ -558,6 +558,47 @@ err:
         Return tempo
     End Function
 
+
+    Private Sub AddFirstLine()
+        lvRec.Items.Clear()
+        '___________________________________________________________________________________________________________
+        'première ligne
+        lvRec.Items.Add(0)
+        lvRec.Items(0).SubItems.Add("195.195.195.195.195.195.195.195")
+        lvRec.Items(0).SubItems.Add("time")
+        lvRec.Items(0).SubItems.Add("")
+        lvRec.Items(0).SubItems.Add("")
+        lvRec.Items(0).SubItems.Add("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        lvRec.Items(0).SubItems.Add("32")
+        lvRec.Items(0).ForeColor = Color.Green
+
+        tvREC.Nodes.Clear()
+        tvREC.Nodes.Add("k0", "0:" & "195.195.195.195.195.195.195.195")
+        tvREC.Nodes("k0").Tag = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        tvREC.Nodes("k0").ForeColor = Color.Green
+    End Sub
+
+    Private Function AlumeCase(sqN As String, ByRef rec As String) As String
+        Dim sqIndex As Byte
+        Dim colonne As Byte
+        Dim ligne As Byte
+        Dim LesColonnes As String()
+
+        sqIndex = ThePOS.SquareIndex(sqN) 'index de la case
+
+        colonne = sqIndex Mod 10
+        ligne = sqIndex \ 10
+
+        LesColonnes = rec.Split(".")
+
+        LesColonnes(colonne - 1) = LesColonnes(colonne - 1) + Math.Pow((ligne), 2 - 1)
+
+        Return (Join(LesColonnes, "."))
+
+
+
+    End Function
+
     'charge lvREC avec les données d'un fichier
     Private Sub LoadToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles LoadToolStripMenuItem.Click
 
@@ -580,7 +621,7 @@ err:
         Dim RecTempo() As String
         Dim RecordsInFile As String
 
-        On Error GoTo ErrorHandler
+        'On Error GoTo ErrorHandler
 
         RecordsInFile = My.Computer.FileSystem.ReadAllText(nomfichier)
 
@@ -592,40 +633,68 @@ err:
         Dim LastLine As String
         Dim sqOn As String = ""
         Dim sqOff As String = ""
-
+        Dim NbP As Integer
         LastLine = RecTempo(0).Substring(0, RecTempo(0).Length - 2)
 
-        lvRec.Items.Clear()
-        '___________________________________________________________________________________________________________
-        'première ligne
-        lvRec.Items.Add(0)
-        lvRec.Items(0).SubItems.Add(LastLine)
-        lvRec.Items(0).SubItems.Add(RecTempo(j + 1))
-        lvRec.Items(0).SubItems.Add(sqOff)
-        lvRec.Items(0).SubItems.Add(sqOn)
-        lvRec.Items(0).SubItems.Add("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        lvRec.Items(0).SubItems.Add("32")
-        lvRec.Items(0).ForeColor = Color.Green
+        AddFirstLine()
+
         '___________________________________________________________________________________________________________    
         j = j + 2
         i = i + 1
         '___________________________________________________________________________________________________________
         'rempli lvREC
         While j < RecTempo.Length - 2
+
             lvRec.Items.Add(i)
             NewLine = RecTempo(j).Substring(0, RecTempo(j).Length - 2) 'supprimer l . en fin de ligne
             lvRec.Items(i).SubItems.Add(NewLine)
             lvRec.Items(i).SubItems.Add(RecTempo(j + 1)) 'ajoute le temps de stabilité
+
             FindOnOff(NewLine, LastLine, sqOn, sqOff) 'cherche les différence            
+
             If sqOn <> "" And sqOff <> "" Then
-                lvRec.Items(i).ForeColor = Color.Purple
+
+                'ajout d'une ligne fictive
+                'on allume sqOff 
+                Dim NewLine2 As String
+                NewLine2 = AlumeCase(sqOff, NewLine)
+
+                lvRec.Items(i).SubItems(lv_rec).Text = NewLine2
+                lvRec.Items(i).SubItems.Add("")
+                lvRec.Items(i).SubItems.Add(sqOn)
+                lvRec.Items(i).SubItems.Add("")
+                NbP = NbPiece(NewLine2)
+                lvRec.Items(i).SubItems.Add(NbP)
+                lvRec.Items(i).ForeColor = Color.Cyan
+
+                LastLine = NewLine2
+
+                tvREC.Nodes.Add("k" & i, i & " " & NewLine & IIf(sqOff = "", "", " -" & sqOff) & IIf(sqOn = "", "", " +" & sqOn) & " ")
+
+                i = i + 1
+                lvRec.Items.Add(i)
+                NewLine = RecTempo(j).Substring(0, RecTempo(j).Length - 2) 'supprimer l . en fin de ligne
+                lvRec.Items(i).SubItems.Add(NewLine)
+                lvRec.Items(i).SubItems.Add(RecTempo(j + 1)) 'ajoute le temps de stabilité
+                FindOnOff(NewLine, LastLine, sqOn, sqOff) 'cherche les différence            
+
             End If
             lvRec.Items(i).SubItems.Add(sqOff)
             lvRec.Items(i).SubItems.Add(sqOn)
             lvRec.Items(i).SubItems.Add("")
-            lvRec.Items(i).SubItems.Add(NbPiece(NewLine))
+            NbP = NbPiece(NewLine)
+            lvRec.Items(i).SubItems.Add(NbP)
+
+
+            tvREC.Nodes.Add("k" & i, i & " " & NewLine & IIf(sqOff = "", "", " -" & sqOff) & IIf(sqOn = "", "", " +" & sqOn) & " ")
 
             LastLine = NewLine
+
+            If NewLine = "195.195.195.195.195.195.195.195" Then
+                AddFirstLine()
+                i = 0
+            End If
+
             j = j + 2
             i = i + 1
 
@@ -730,7 +799,7 @@ ErrorHandler:
                         End If
 
                     Else
-                        Debug.Print("ligne " & idep + i & " déjà rejeté")
+                        'Debug.Print("ligne " & idep + i & " déjà rejeté")
                     End If
                 End If
             Next
@@ -749,15 +818,36 @@ ErrorHandler:
 
         LesRecs = ThePOS.GetAllRecs()  'récupère les signatures possibles forme : 195.195...195 a1h8|195.195...195 a1h8
         RecPossibles = LesRecs.Split("|") 'sépare le rec
-
+        'tvREC.Nodes("k" & idep - 1).Nodes.Add("nb" & idep, RecPossibles.Count)
         For c = 0 To RecPossibles.Count - 1 'pour chaque signature possible
             LeCoup = RecPossibles(c).Split(" ") 'sépare la signature du coup
             For i = 0 To 20 'cherche dans les signatures suivantes
                 If Convert.ToByte(lvRec.Items(idep + i).SubItems(lv_Nb).Text) >= Convert.ToByte(lvRec.Items(idep + i).SubItems(lv_Nb).Text) Then 'si le nombre de pièce n'augmente pas 
                     If lvRec.Items(idep + i).SubItems(lv_rec).Text = LeCoup(0) Then 'si la signature correspond
+
+
+                        If lvRec.Items(idep + i).ForeColor <> Color.Red Then
+                            tvREC.Nodes("k" & idep - 1).Nodes.Add(LeCoup(2), LeCoup(2))
+                            tvREC.Nodes("k" & idep - 1).Expand()
+                            'tvREC.Nodes("k" & idep + i).Text &= LeCoup(2)
+                        End If
+                        tvREC.Nodes("k" & idep + i).Text &= LeCoup(2) & " "
+
                         If lvRec.Items(idep + i).ForeColor <> Color.Red Then 'si la ligne n'a pas été rejeté
+
+
                             lvRec.Items(idep + i).ForeColor = Color.Aqua
-                            lvRec.Items(idep + i).SubItems(lv_FEN).Text = LeCoup(1)
+
+                            Dim bakfen As String
+                            bakfen = ThePOS.GetFEN
+                            ThePOS.MakeMove(LeCoup(1))
+                            lvRec.Items(idep + i).SubItems(lv_FEN).Text = ThePOS.GetFEN
+                            ThePOS.SetFEN(bakfen)
+
+                            tvREC.Nodes("k" & idep + i).ForeColor = Color.Aqua
+
+
+                            'lvRec.Items(idep + i).SubItems(lv_FEN).Text = LeCoup(1)
                             If lvRec.Items(idep + i).SubItems(lv_on).Text = LeCoup(1).Substring(2, 2) Then 'si la case d'arrivé du coup est celle qui vient de s'allumer
                                 If i < iMin Then
                                     uci_move = LeCoup(1)
@@ -776,6 +866,9 @@ ErrorHandler:
                 End If
             Next
         Next
+
+
+
         Return iMin 'on a rien trouvé
     End Function
 
@@ -819,7 +912,7 @@ ErrorHandler:
     '    lvRec.Items(idep + imax).SubItems(lv_FEN).Text = ThePOS.GetFEN
     'End Sub
 
-    Private Sub FindNextMove()
+    Private Function FindNextMove() As Boolean
         Dim LeSuivant As Byte
         Dim idep As Integer
 
@@ -827,6 +920,8 @@ ErrorHandler:
         Dim PasTrouve As Boolean = True
         Dim i As Integer
         Dim aFen As String
+
+        On Error GoTo err
 
         i = lvRec.Items.Count - 1
         While PasTrouve
@@ -843,24 +938,35 @@ ErrorHandler:
 
         'idep = lvRec.SelectedItems.Item(0).Index + 1 'ligne de départ
 
+        If CByte(lvRec.Items(idep).SubItems(lv_Nb).Text) < CByte(lvRec.Items(idep - 1).SubItems(lv_Nb).Text) + 2 Then
 
-        'LeSuivant = indexNextRec(idep, sqfrom, lecoup)
-        LeSuivant = indexNextAllRec(idep, lecoup)
-        If LeSuivant <> 255 Then
-            lvRec.Items(idep + LeSuivant).ForeColor = Color.Green
-            If ThePOS.IsValidMove(lecoup) Then
-                'sqFrom = lecoup.Substring(0, 2)
-                'sqTo = lecoup.Substring(2, 2)
-                'AddMove()
-                ThePOS.MakeMove(lecoup)
-                DrawPiece()
-                lvRec.Items(idep + LeSuivant).SubItems(lv_FEN).Text = ThePOS.GetFEN
+            'LeSuivant = indexNextRec(idep, sqfrom, lecoup)
+            LeSuivant = indexNextAllRec(idep, lecoup)
+            If LeSuivant <> 255 Then
+                lvRec.Items(idep + LeSuivant).ForeColor = Color.Green
+                tvREC.Nodes("k" & idep + LeSuivant).ForeColor = Color.Green
+                If ThePOS.IsValidMove(lecoup) Then
+                    'sqFrom = lecoup.Substring(0, 2)
+                    'sqTo = lecoup.Substring(2, 2)
+                    'AddMove()
+                    Debug.Print(ThePOS.PGNmove(lecoup))
+                    ThePOS.MakeMove(lecoup)
+                    DrawPiece()
+                    lvRec.Items(idep + LeSuivant).SubItems(lv_FEN).Text = ThePOS.GetFEN
+                    tvREC.Nodes("k" & idep + LeSuivant).Tag = ThePOS.GetFEN
+                End If
+            Else
+                lvRec.Items(idep - 1).ForeColor = Color.Red
+                tvREC.Nodes("k" & idep - 1).ForeColor = Color.Red
+                'tvREC.Nodes("k" & idep - 1).Nodes("ks" & 1).ForeColor = Color.Red
             End If
+            Return True
         Else
-            lvRec.Items(idep - 1).ForeColor = Color.Red
+            Return False
         End If
-
-    End Sub
+err:
+        Return False
+    End Function
 
     Private Sub DelLineToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles DelLineToolStripMenuItem.Click
 
@@ -878,9 +984,7 @@ ErrorHandler:
     End Sub
 
 
-    Private Sub lvRec_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles lvRec.SelectedIndexChanged
 
-    End Sub
 
     Private Sub sslbl1_Click(sender As System.Object, e As System.EventArgs) Handles sslbl1.Click
         FindNextMove()
@@ -891,6 +995,29 @@ ErrorHandler:
     End Sub
 
     Private Sub FindNextToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles FindNextToolStripMenuItem.Click
-        FindNextMove()
+        While FindNextMove()
+
+        End While
+
+    End Sub
+
+
+
+    Private Sub tvREC_NodeMouseDoubleClick(sender As Object, e As System.Windows.Forms.TreeNodeMouseClickEventArgs) Handles tvREC.NodeMouseDoubleClick
+        Dim afen As String
+        afen = lvRec.Items(tvREC.SelectedNode.Index).SubItems(lv_FEN).Text
+        If afen <> "" Then
+            ThePOS.SetFEN(afen)
+            DrawPiece()
+        End If
+    End Sub
+
+
+    Private Sub lvRec_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles lvRec.SelectedIndexChanged
+
+    End Sub
+
+    Private Sub tvREC_AfterSelect(sender As System.Object, e As System.Windows.Forms.TreeViewEventArgs) Handles tvREC.AfterSelect
+
     End Sub
 End Class

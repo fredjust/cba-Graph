@@ -773,6 +773,7 @@
         Dim CanFrom() As String
         Dim TempoRec As String = ""
         Dim BackupFen As String
+        Dim SanMove As String
 
         If strSquare.Length = 2 Then
             If ColorOf(SquareIndex(strSquare)) = aFEN.ToPlay Then
@@ -786,8 +787,9 @@
                             strTempo = CanGo(i)
                         End If
                         BackupFen = GetFEN()
+                        sanmove = PGNmove(strSquare & strTempo)
                         MakeMove(strSquare & strTempo)
-                        TempoRec = TempoRec & "|" & GetRec() & " " & strSquare & strTempo
+                        TempoRec = TempoRec & "|" & GetRec() & " " & strSquare & strTempo & " " & sanmove
                         SetFEN(BackupFen)
                     Next
                     Return Trim(TempoRec.Substring(1))
@@ -801,8 +803,9 @@
                         strTempo = CanFrom(i)
 
                         BackupFen = GetFEN()
+                        sanmove = PGNmove(strSquare & strTempo)
                         MakeMove(strTempo & strSquare)
-                        TempoRec = TempoRec & "|" & GetRec() & " " & strTempo & strSquare
+                        TempoRec = TempoRec & "|" & GetRec() & " " & strTempo & strSquare & " " & sanmove
                         SetFEN(BackupFen)
 
                     Next

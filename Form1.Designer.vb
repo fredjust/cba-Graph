@@ -54,6 +54,9 @@ Partial Class frmMain
         Me.ssRec = New System.Windows.Forms.StatusStrip()
         Me.sslbl1 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
+        Me.tsslRec = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.tvREC = New System.Windows.Forms.TreeView()
         Me.mnLv = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.LoadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
@@ -69,6 +72,8 @@ Partial Class frmMain
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
         Me.ssRec.SuspendLayout()
+        Me.TabPage3.SuspendLayout()
+        Me.StatusStrip1.SuspendLayout()
         Me.mnLv.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -282,6 +287,8 @@ Partial Class frmMain
         '
         'TabPage3
         '
+        Me.TabPage3.Controls.Add(Me.StatusStrip1)
+        Me.TabPage3.Controls.Add(Me.tvREC)
         Me.TabPage3.Location = New System.Drawing.Point(4, 22)
         Me.TabPage3.Name = "TabPage3"
         Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
@@ -290,11 +297,36 @@ Partial Class frmMain
         Me.TabPage3.Text = "TabPage3"
         Me.TabPage3.UseVisualStyleBackColor = True
         '
+        'StatusStrip1
+        '
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslRec})
+        Me.StatusStrip1.Location = New System.Drawing.Point(3, 301)
+        Me.StatusStrip1.Name = "StatusStrip1"
+        Me.StatusStrip1.Size = New System.Drawing.Size(309, 22)
+        Me.StatusStrip1.TabIndex = 1
+        Me.StatusStrip1.Text = "StatusStrip1"
+        '
+        'tsslRec
+        '
+        Me.tsslRec.Name = "tsslRec"
+        Me.tsslRec.Size = New System.Drawing.Size(121, 17)
+        Me.tsslRec.Text = "ToolStripStatusLabel1"
+        '
+        'tvREC
+        '
+        Me.tvREC.BackColor = System.Drawing.Color.Black
+        Me.tvREC.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvREC.ForeColor = System.Drawing.Color.White
+        Me.tvREC.Location = New System.Drawing.Point(3, 3)
+        Me.tvREC.Name = "tvREC"
+        Me.tvREC.Size = New System.Drawing.Size(309, 320)
+        Me.tvREC.TabIndex = 0
+        '
         'mnLv
         '
         Me.mnLv.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.LoadToolStripMenuItem, Me.ToolStripMenuItem1, Me.FindNextToolStripMenuItem, Me.DelLineToolStripMenuItem, Me.mniFindRec, Me.TestToolStripMenuItem})
         Me.mnLv.Name = "mnLv"
-        Me.mnLv.Size = New System.Drawing.Size(153, 142)
+        Me.mnLv.Size = New System.Drawing.Size(125, 120)
         '
         'LoadToolStripMenuItem
         '
@@ -310,7 +342,7 @@ Partial Class frmMain
         'FindNextToolStripMenuItem
         '
         Me.FindNextToolStripMenuItem.Name = "FindNextToolStripMenuItem"
-        Me.FindNextToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.FindNextToolStripMenuItem.Size = New System.Drawing.Size(124, 22)
         Me.FindNextToolStripMenuItem.Text = "Find Next"
         '
         'DelLineToolStripMenuItem
@@ -352,6 +384,10 @@ Partial Class frmMain
         Me.TabPage2.PerformLayout()
         Me.ssRec.ResumeLayout(False)
         Me.ssRec.PerformLayout()
+        Me.TabPage3.ResumeLayout(False)
+        Me.TabPage3.PerformLayout()
+        Me.StatusStrip1.ResumeLayout(False)
+        Me.StatusStrip1.PerformLayout()
         Me.mnLv.ResumeLayout(False)
         Me.ResumeLayout(False)
 
@@ -394,5 +430,8 @@ Partial Class frmMain
     Friend WithEvents TestToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ssRec As System.Windows.Forms.StatusStrip
     Friend WithEvents sslbl1 As System.Windows.Forms.ToolStripStatusLabel
+    Friend WithEvents tvREC As System.Windows.Forms.TreeView
+    Friend WithEvents StatusStrip1 As System.Windows.Forms.StatusStrip
+    Friend WithEvents tsslRec As System.Windows.Forms.ToolStripStatusLabel
 
 End Class
