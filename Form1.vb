@@ -568,7 +568,7 @@ err:
         With OpenFileDialog1
             'On spécifie l'extension de fichiers visibles
             .FileName = ""
-            .Filter = "ARD Files (*.ard) | *.ard"
+            .Filter = "ARD Files (*.*) | *.*"
             'On affiche et teste le retour du dialogue
             If .ShowDialog = Windows.Forms.DialogResult.OK Then
                 'On récupère le nom du fichier
@@ -605,6 +605,7 @@ err:
         lvRec.Items(0).SubItems.Add(sqOn)
         lvRec.Items(0).SubItems.Add("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         lvRec.Items(0).SubItems.Add("32")
+        lvRec.Items(0).ForeColor = Color.Green
         '___________________________________________________________________________________________________________    
         j = j + 2
         i = i + 1
@@ -818,21 +819,41 @@ ErrorHandler:
     '    lvRec.Items(idep + imax).SubItems(lv_FEN).Text = ThePOS.GetFEN
     'End Sub
 
-    Private Sub FindNextToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles FindNextToolStripMenuItem.Click
+    Private Sub FindNextMove()
         Dim LeSuivant As Byte
         Dim idep As Integer
-        Dim sqfrom As String
-        Dim lecoup As String = ""
 
-        idep = lvRec.SelectedItems.Item(0).Index + 1 'ligne de départ
-        sqfrom = lvRec.Items(idep).SubItems(lv_off).Text 'récupère la case qui s'éteint
+        Dim lecoup As String = ""
+        Dim PasTrouve As Boolean = True
+        Dim i As Integer
+        Dim aFen As String
+
+        i = lvRec.Items.Count - 1
+        While PasTrouve
+            i = i - 1
+            If lvRec.Items(i).ForeColor = Color.Green Then
+                aFen = lvRec.Items(i).SubItems(lv_FEN).Text
+                ThePOS.SetFEN(aFen)
+
+                PasTrouve = False
+                idep = i + 1
+            End If
+
+        End While
+
+        'idep = lvRec.SelectedItems.Item(0).Index + 1 'ligne de départ
+
 
         'LeSuivant = indexNextRec(idep, sqfrom, lecoup)
         LeSuivant = indexNextAllRec(idep, lecoup)
         If LeSuivant <> 255 Then
             lvRec.Items(idep + LeSuivant).ForeColor = Color.Green
             If ThePOS.IsValidMove(lecoup) Then
+                'sqFrom = lecoup.Substring(0, 2)
+                'sqTo = lecoup.Substring(2, 2)
+                'AddMove()
                 ThePOS.MakeMove(lecoup)
+                DrawPiece()
                 lvRec.Items(idep + LeSuivant).SubItems(lv_FEN).Text = ThePOS.GetFEN
             End If
         Else
@@ -857,4 +878,19 @@ ErrorHandler:
     End Sub
 
 
+    Private Sub lvRec_SelectedIndexChanged(sender As System.Object, e As System.EventArgs) Handles lvRec.SelectedIndexChanged
+
+    End Sub
+
+    Private Sub sslbl1_Click(sender As System.Object, e As System.EventArgs) Handles sslbl1.Click
+        FindNextMove()
+    End Sub
+
+    Private Sub PictureBox1_Click(sender As System.Object, e As System.EventArgs) Handles PictureBox1.Click
+
+    End Sub
+
+    Private Sub FindNextToolStripMenuItem_Click(sender As System.Object, e As System.EventArgs) Handles FindNextToolStripMenuItem.Click
+        FindNextMove()
+    End Sub
 End Class

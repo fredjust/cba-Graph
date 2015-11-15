@@ -50,18 +50,18 @@ Partial Class frmMain
         Me.ColumnHeader4 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ColumnHeader5 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ColumnHeader6 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader7 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ssRec = New System.Windows.Forms.StatusStrip()
         Me.sslbl1 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.mnLv = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.LoadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.mniFindRec = New System.Windows.Forms.ToolStripMenuItem()
-        Me.DelLineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.FindNextToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-        Me.ColumnHeader7 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.DelLineToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mniFindRec = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnFrm.SuspendLayout()
@@ -261,6 +261,10 @@ Partial Class frmMain
         '
         Me.ColumnHeader6.Text = "FEN"
         '
+        'ColumnHeader7
+        '
+        Me.ColumnHeader7.Text = "Nb"
+        '
         'ssRec
         '
         Me.ssRec.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.sslbl1})
@@ -288,7 +292,7 @@ Partial Class frmMain
         '
         'mnLv
         '
-        Me.mnLv.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FindNextToolStripMenuItem, Me.ToolStripMenuItem1, Me.LoadToolStripMenuItem, Me.DelLineToolStripMenuItem, Me.mniFindRec, Me.TestToolStripMenuItem})
+        Me.mnLv.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.LoadToolStripMenuItem, Me.ToolStripMenuItem1, Me.FindNextToolStripMenuItem, Me.DelLineToolStripMenuItem, Me.mniFindRec, Me.TestToolStripMenuItem})
         Me.mnLv.Name = "mnLv"
         Me.mnLv.Size = New System.Drawing.Size(153, 142)
         '
@@ -303,32 +307,28 @@ Partial Class frmMain
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
         Me.ToolStripMenuItem1.Size = New System.Drawing.Size(121, 6)
         '
-        'mniFindRec
-        '
-        Me.mniFindRec.Name = "mniFindRec"
-        Me.mniFindRec.Size = New System.Drawing.Size(124, 22)
-        Me.mniFindRec.Text = "Find Rec"
-        '
-        'DelLineToolStripMenuItem
-        '
-        Me.DelLineToolStripMenuItem.Name = "DelLineToolStripMenuItem"
-        Me.DelLineToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
-        Me.DelLineToolStripMenuItem.Text = "Del Line"
-        '
         'FindNextToolStripMenuItem
         '
         Me.FindNextToolStripMenuItem.Name = "FindNextToolStripMenuItem"
         Me.FindNextToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.FindNextToolStripMenuItem.Text = "Find Next"
         '
-        'ColumnHeader7
+        'DelLineToolStripMenuItem
         '
-        Me.ColumnHeader7.Text = "Nb"
+        Me.DelLineToolStripMenuItem.Name = "DelLineToolStripMenuItem"
+        Me.DelLineToolStripMenuItem.Size = New System.Drawing.Size(124, 22)
+        Me.DelLineToolStripMenuItem.Text = "Del Line"
+        '
+        'mniFindRec
+        '
+        Me.mniFindRec.Name = "mniFindRec"
+        Me.mniFindRec.Size = New System.Drawing.Size(124, 22)
+        Me.mniFindRec.Text = "Find Rec"
         '
         'TestToolStripMenuItem
         '
         Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
-        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(124, 22)
         Me.TestToolStripMenuItem.Text = "test"
         '
         'frmMain
@@ -389,10 +389,10 @@ Partial Class frmMain
     Friend WithEvents FindNextToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents OpenFileDialog1 As System.Windows.Forms.OpenFileDialog
     Friend WithEvents ColumnHeader5 As System.Windows.Forms.ColumnHeader
-    Friend WithEvents ssRec As System.Windows.Forms.StatusStrip
-    Friend WithEvents sslbl1 As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents ColumnHeader6 As System.Windows.Forms.ColumnHeader
     Friend WithEvents ColumnHeader7 As System.Windows.Forms.ColumnHeader
     Friend WithEvents TestToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ssRec As System.Windows.Forms.StatusStrip
+    Friend WithEvents sslbl1 As System.Windows.Forms.ToolStripStatusLabel
 
 End Class
