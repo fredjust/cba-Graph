@@ -185,9 +185,6 @@
     <None Include="Resources\reduire0.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\bleu2.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\bleu2.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

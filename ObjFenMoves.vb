@@ -35,6 +35,7 @@
     ' 20 21 22 23 24 25 26 27 28 29     =>      xx a2 b2 c2 d2 e2 f2 g2 h2 xx
     ' 10 11 12 13 14 15 16 17 18 19     =>      xx a1 b1 c1 d1 e1 f1 g1 h1 xx
     ' 00 01 02 03 04 05 06 07 08 09     =>      xx xx xx xx xx xx xx xx xx xx 
+
     Public Board10x10(100) As Char
 
     'les direction possible pour le tableau 10x10    
