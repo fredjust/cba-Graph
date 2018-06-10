@@ -1,6 +1,3 @@
-# cba-Graph
-VB10 test graphic chess interface
-
-Interface d'échecs en VB 10  
-Module de génération des coups valides pour une pièces
-
+version epurée pour github  
+destinée a ré écrire l'interface uniuqement  
+et rien d'autre  

@@ -1,11 +1,6 @@
 ﻿Public Class frmMain
 
     'FredJust@gmail.com
-    'avril 2015
-    'les graphiques ne font que 88x88
-    'pour des écrans de 768 de haut max
-    'a tester en Full HD
-    'il faudrait peut etre changer les PNG qui existent en tout les tailles sur le web
 
 #Region "Les Images PNG"
     Dim wp As New Bitmap(My.Resources.wp)
@@ -42,17 +37,11 @@
     'variable globale quelle horreur
     Dim sqFrom As String
     Dim sqTo As String
-    Dim MoveByClic As Boolean
     Dim EffaceNoir As Boolean = False   'une rustine de dernière minute
+
+    'mon objet pour gérer les mouvements
     Public ThePOS As ObjFenMoves
 
-    Public Const lv_num As Byte = 0
-    Public Const lv_rec As Byte = 1
-    Public Const lv_time As Byte = 2
-    Public Const lv_off As Byte = 3
-    Public Const lv_on As Byte = 4
-    Public Const lv_FEN As Byte = 5
-    Public Const lv_Nb As Byte = 6
 
 
 #Region "Fonction de dessin"
@@ -99,7 +88,7 @@
         End Select
     End Function
 
-    'retourne la position X de la case
+    'retourne la position X en pixel de la case dans la fenetre a partir d'un numero de case
     Private Function Xsqi(ByVal sqi As Byte) As Integer
         Dim colonne As Byte
         Dim ligne As Byte
@@ -111,7 +100,7 @@
 
     End Function
 
-    'retourne la position Y de la case
+    'retourne la position Y en pixel de la case dans la fenetre a partir d'un numero de case
     Private Function Ysqi(ByVal sqi As Byte) As Integer
         Dim colonne As Byte
         Dim ligne As Byte
@@ -148,7 +137,7 @@
 
     End Sub
 
-    'dessine un cercle sur une case
+    'dessine un cercle sur une case TODO test pour la suite
     Private Sub PutCircle(ByVal sqIndex As Byte, ByVal Initiale As Char)
         Dim rect As Rectangle
         Dim p As Graphics = PictureBox1.CreateGraphics
@@ -165,62 +154,63 @@
 
     End Sub
 
+    'dessine l'échiquier
+    Private Sub DrawChessBoard()
 
-
-    'dessine l'échiquier puis  les pièces
-    Private Sub DrawPiece()
         Dim rect As Rectangle
         Dim pt As Point
 
+        PictureBox1.Top = 10
+        PictureBox1.Left = 10
+
+        PictureBox1.Height = Me.ClientSize.Height - 20
+        PictureBox1.Width = Me.ClientSize.Height - 20
+
+        PictureBox1.Image = New Bitmap(PictureBox1.Width, PictureBox1.Height)
+
+        backBuffer = New Bitmap(PictureBox1.Width, PictureBox1.Height)
+        g = Graphics.FromImage(backBuffer)
+
+        pt.X = 1 : pt.Y = 1 : g.DrawImage(bHaut, pt)                        'dessine le bord haut
+        pt.X = 1 : pt.Y = PictureBox1.Height - 17 : g.DrawImage(bHaut, pt)  'dessine le bord bas
+        pt.X = 1 : pt.Y = 1 : g.DrawImage(bCote, pt)                        'dessine le bord gauche
+        pt.X = PictureBox1.Width - 17 : pt.Y = 1 : g.DrawImage(bCote, pt)   'dessine le bord droit
+
+        pt.X = bHaut.Width - 1 : pt.Y = 1 : g.DrawImage(bHaut, pt)                        'dessine le bord haut
+        pt.X = bHaut.Width - 1 : pt.Y = PictureBox1.Height - 17 : g.DrawImage(bHaut, pt)  'dessine le bord bas
+        pt.X = 1 : pt.Y = bCote.Height - 1 : g.DrawImage(bCote, pt)                        'dessine le bord gauche
+        pt.X = PictureBox1.Width - 17 : pt.Y = bCote.Height - 1 : g.DrawImage(bCote, pt)   'dessine le bord droit
+
+        rect.X = 18 : rect.Y = 18
+        rect.Width = PictureBox1.Width - 36 : rect.Height = PictureBox1.Height - 36
+        g.DrawImage(bboard, rect)                                           'dessine l'échiquier
+
+        rect.X = 0 : rect.Y = 0
+        rect.Width = PictureBox1.Width - 1 : rect.Height = PictureBox1.Height - 1
+        g.DrawRectangle(Pens.Brown, rect)                                   'dessine le filet exterieur 
+
+        rect.X = 17 : rect.Y = 17
+        rect.Width = PictureBox1.Width - 35 : rect.Height = PictureBox1.Height - 35
+        g.DrawRectangle(Pens.Black, rect)                                   'dessine le filet intérieur
+
+        PieceSize = (PictureBox1.Height - 36) / 8
+
+        With TabControl1
+            .Top = 10
+            .Left = PictureBox1.Left + PictureBox1.Width + 10
+            .Height = Me.ClientSize.Height - .Top - 10
+            .Width = Me.ClientSize.Width - (PictureBox1.Width + 30)
+        End With
+
+    End Sub
+
+
+    'dessine les pièces
+    Private Sub DrawPiece()
+
         If Me.WindowState <> FormWindowState.Minimized Then
 
-            PictureBox1.Top = 10
-            PictureBox1.Left = 10
-
-            PictureBox1.Height = Me.ClientSize.Height - 20
-            PictureBox1.Width = Me.ClientSize.Height - 20
-
-            PictureBox1.Image = New Bitmap(PictureBox1.Width, PictureBox1.Height)
-
-            backBuffer = New Bitmap(PictureBox1.Width, PictureBox1.Height)
-            g = Graphics.FromImage(backBuffer)
-
-            pt.X = 1 : pt.Y = 1 : g.DrawImage(bHaut, pt)                        'dessine le bord haut
-            pt.X = 1 : pt.Y = PictureBox1.Height - 17 : g.DrawImage(bHaut, pt)  'dessine le bord bas
-            pt.X = 1 : pt.Y = 1 : g.DrawImage(bCote, pt)                        'dessine le bord gauche
-            pt.X = PictureBox1.Width - 17 : pt.Y = 1 : g.DrawImage(bCote, pt)   'dessine le bord droit
-
-            pt.X = bHaut.Width - 1 : pt.Y = 1 : g.DrawImage(bHaut, pt)                        'dessine le bord haut
-            pt.X = bHaut.Width - 1 : pt.Y = PictureBox1.Height - 17 : g.DrawImage(bHaut, pt)  'dessine le bord bas
-            pt.X = 1 : pt.Y = bCote.Height - 1 : g.DrawImage(bCote, pt)                        'dessine le bord gauche
-            pt.X = PictureBox1.Width - 17 : pt.Y = bCote.Height - 1 : g.DrawImage(bCote, pt)   'dessine le bord droit
-
-            rect.X = 18 : rect.Y = 18
-            rect.Width = PictureBox1.Width - 36 : rect.Height = PictureBox1.Height - 36
-            g.DrawImage(bboard, rect)                                           'dessine l'échiquier
-
-            rect.X = 0 : rect.Y = 0
-            rect.Width = PictureBox1.Width - 1 : rect.Height = PictureBox1.Height - 1
-            g.DrawRectangle(Pens.Brown, rect)                                   'dessine le filet exterieur 
-
-            rect.X = 17 : rect.Y = 17
-            rect.Width = PictureBox1.Width - 35 : rect.Height = PictureBox1.Height - 35
-            g.DrawRectangle(Pens.Black, rect)                                   'dessine le filet intérieur
-
-
-
-
-
-            PieceSize = (PictureBox1.Height - 36) / 8
-
-
-
-            With TabControl1
-                .Top = 10
-                .Left = PictureBox1.Left + PictureBox1.Width + 10
-                .Height = Me.ClientSize.Height - .Top - 10
-                .Width = Me.ClientSize.Width - (PictureBox1.Width + 30)
-            End With
+            DrawChessBoard()
 
             PictureBox1.Image = backBuffer
 
@@ -232,6 +222,7 @@
                 End If
             Next
         End If
+
     End Sub
 
     'place les symboles de déplacement d'une pièce
@@ -242,8 +233,6 @@
         Dim txtMoves As String
 
         txtMoves = ThePOS.GetMoves(sqFrom)
-        'Debug.Print("DrawMove:" & sqFrom)
-
 
         If txtMoves.Length > 0 Then
             sqMoves = txtMoves.Split(" ")
@@ -381,18 +370,13 @@
     Private Sub PictureBox1_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseUp
         Dim sqI As String
 
-
-
-
         'récupère le nom de la case sur lequel le curseur se trouve
         sqI = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
                     + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
 
-            Debug.Print("MouseUp: " & sqI & "-" & sqFrom & "-" & sqTo)
-
-            'si on a changé de case depuis mousedown
-            'déplacement par drag&drop
-            If sqI <> sqFrom Then
+        'si on a changé de case depuis mousedown
+        'déplacement par drag&drop
+        If sqI <> sqFrom Then
                 sqTo = sqI
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
                     AddMove()
