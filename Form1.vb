@@ -31,8 +31,8 @@
 
     'graphic sur la picturebox
     'je ne comprends pas trop comment cela fonctionne vraiment
-    Dim backBuffer As New Bitmap(My.Resources.board90)
-    Dim g As Graphics = Graphics.FromImage(backBuffer)
+    Dim bmp_backBuffer As New Bitmap(My.Resources.board90)
+    Dim gr_chessboard As Graphics = Graphics.FromImage(bmp_backBuffer)
 
     'variable globale quelle horreur
     Dim sqFrom As String
@@ -83,7 +83,6 @@
             Case "4"
                 Return GreenCross
 
-
         End Select
     End Function
 
@@ -119,7 +118,7 @@
         rect.Width = PieceSize
         rect.Height = PieceSize
 
-        g.DrawImage(bmpPiece(Initiale), rect)
+        gr_chessboard.DrawImage(bmpPiece(Initiale), rect)
 
     End Sub
 
@@ -170,30 +169,30 @@
 
         PictureBox1.Image = New Bitmap(PictureBox1.Width, PictureBox1.Height)
 
-        backBuffer = New Bitmap(PictureBox1.Width, PictureBox1.Height)
-        g = Graphics.FromImage(backBuffer)
+        bmp_backBuffer = New Bitmap(PictureBox1.Width, PictureBox1.Height)
+        gr_chessboard = Graphics.FromImage(bmp_backBuffer)
 
-        pt.X = 1 : pt.Y = 1 : g.DrawImage(bHaut, pt)                        'dessine le bord haut
-        pt.X = 1 : pt.Y = PictureBox1.Height - 17 : g.DrawImage(bHaut, pt)  'dessine le bord bas
-        pt.X = 1 : pt.Y = 1 : g.DrawImage(bCote, pt)                        'dessine le bord gauche
-        pt.X = PictureBox1.Width - 17 : pt.Y = 1 : g.DrawImage(bCote, pt)   'dessine le bord droit
+        pt.X = 1 : pt.Y = 1 : gr_chessboard.DrawImage(bHaut, pt)                        'dessine le bord haut
+        pt.X = 1 : pt.Y = PictureBox1.Height - 17 : gr_chessboard.DrawImage(bHaut, pt)  'dessine le bord bas
+        pt.X = 1 : pt.Y = 1 : gr_chessboard.DrawImage(bCote, pt)                        'dessine le bord gauche
+        pt.X = PictureBox1.Width - 17 : pt.Y = 1 : gr_chessboard.DrawImage(bCote, pt)   'dessine le bord droit
 
-        pt.X = bHaut.Width - 1 : pt.Y = 1 : g.DrawImage(bHaut, pt)                        'dessine le bord haut
-        pt.X = bHaut.Width - 1 : pt.Y = PictureBox1.Height - 17 : g.DrawImage(bHaut, pt)  'dessine le bord bas
-        pt.X = 1 : pt.Y = bCote.Height - 1 : g.DrawImage(bCote, pt)                        'dessine le bord gauche
-        pt.X = PictureBox1.Width - 17 : pt.Y = bCote.Height - 1 : g.DrawImage(bCote, pt)   'dessine le bord droit
+        pt.X = bHaut.Width - 1 : pt.Y = 1 : gr_chessboard.DrawImage(bHaut, pt)                        'dessine le bord haut
+        pt.X = bHaut.Width - 1 : pt.Y = PictureBox1.Height - 17 : gr_chessboard.DrawImage(bHaut, pt)  'dessine le bord bas
+        pt.X = 1 : pt.Y = bCote.Height - 1 : gr_chessboard.DrawImage(bCote, pt)                        'dessine le bord gauche
+        pt.X = PictureBox1.Width - 17 : pt.Y = bCote.Height - 1 : gr_chessboard.DrawImage(bCote, pt)   'dessine le bord droit
 
         rect.X = 18 : rect.Y = 18
         rect.Width = PictureBox1.Width - 36 : rect.Height = PictureBox1.Height - 36
-        g.DrawImage(bboard, rect)                                           'dessine l'échiquier
+        gr_chessboard.DrawImage(bboard, rect)                                           'dessine l'échiquier
 
         rect.X = 0 : rect.Y = 0
         rect.Width = PictureBox1.Width - 1 : rect.Height = PictureBox1.Height - 1
-        g.DrawRectangle(Pens.Brown, rect)                                   'dessine le filet exterieur 
+        gr_chessboard.DrawRectangle(Pens.Brown, rect)                                   'dessine le filet exterieur 
 
         rect.X = 17 : rect.Y = 17
         rect.Width = PictureBox1.Width - 35 : rect.Height = PictureBox1.Height - 35
-        g.DrawRectangle(Pens.Black, rect)                                   'dessine le filet intérieur
+        gr_chessboard.DrawRectangle(Pens.Black, rect)                                   'dessine le filet intérieur
 
         PieceSize = (PictureBox1.Height - 36) / 8
 
@@ -214,7 +213,7 @@
 
             DrawChessBoard()
 
-            PictureBox1.Image = backBuffer
+            PictureBox1.Image = bmp_backBuffer
 
             Dim LaPiece As Char
             For i = 11 To 88
@@ -276,7 +275,8 @@
 #Region "Evenement de la form1"
 
     Private Sub Form1_Activated(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Activated
-        ' DrawPiece()
+        Debug.Print("DRAW Form1_Activated")
+        DrawPiece()
     End Sub
 
     Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
@@ -324,6 +324,7 @@
         Select Case Me.WindowState
             Case FormWindowState.Maximized
                 Me.FormBorderStyle = Windows.Forms.FormBorderStyle.None
+                Debug.Print("DRAW Form1_Resize")
                 DrawPiece()
                 MustRedraw = True
                 pbReduire.Visible = True
@@ -332,6 +333,7 @@
                 MustRedraw = True
             Case FormWindowState.Normal
                 If MustRedraw Then
+                    Debug.Print("DRAW Form1_Resize")
                     DrawPiece()
                     MustRedraw = False
                 End If
@@ -343,6 +345,7 @@
         Static WindowsSize As Integer
         If Me.WindowState = FormWindowState.Normal Then
             If WindowsSize <> Me.Width + Me.Height Then
+                Debug.Print("DRAW Form1_ResizeEnd")
                 DrawPiece()
                 WindowsSize = Me.Width + Me.Height
             End If
@@ -430,14 +433,16 @@
         If sqI <> sqFrom Then
                 sqTo = sqI
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
-                    AddMove()
+                AddMove()
+                Debug.Print("DRAW PictureBox1_MouseUp")
                     DrawPiece()
                     sqFrom = ""
                     sqTo = ""
                 Else
                     sqFrom = ""
                     sqTo = ""
-                    DrawPiece()
+                Debug.Print("DRAW PictureBox1_MouseUp")
+                DrawPiece()
 
                 End If
             End If
@@ -512,10 +517,12 @@ err:
         If e.X > lvMoves.Columns(0).Width + lvMoves.Columns(2).Width Then
             ThePOS.SetFEN(lvMoves.SelectedItems(0).SubItems(2).Tag)
             EffaceNoir = False
+            Debug.Print("DRAW lvMoves_MouseClick1")
             DrawPiece()
         Else
             ThePOS.SetFEN(lvMoves.SelectedItems(0).SubItems(1).Tag)
             EffaceNoir = True
+            Debug.Print("DRAW lvMoves_MouseClick1")
             DrawPiece()
         End If
     End Sub
