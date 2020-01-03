@@ -28,18 +28,18 @@ Partial Class frmMain
         Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem5 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.pbReduire = New System.Windows.Forms.PictureBox()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.TabControl1 = New System.Windows.Forms.TabControl()
         Me.TabPage1 = New System.Windows.Forms.TabPage()
         Me.lvMoves = New System.Windows.Forms.ListView()
         Me.chCoup = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chWhite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chBlack = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
-        CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.pbReduire = New System.Windows.Forms.PictureBox()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
+        CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'mnGetRec
@@ -71,26 +71,6 @@ Partial Class frmMain
         Me.ToolStripMenuItem5.Name = "ToolStripMenuItem5"
         Me.ToolStripMenuItem5.Size = New System.Drawing.Size(183, 22)
         Me.ToolStripMenuItem5.Text = "ToolStripMenuItem5"
-        '
-        'pbReduire
-        '
-        Me.pbReduire.BackgroundImage = Global.TestGraphic.My.Resources.Resources.reduire0
-        Me.pbReduire.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
-        Me.pbReduire.Location = New System.Drawing.Point(832, 37)
-        Me.pbReduire.Name = "pbReduire"
-        Me.pbReduire.Size = New System.Drawing.Size(26, 17)
-        Me.pbReduire.TabIndex = 12
-        Me.pbReduire.TabStop = False
-        '
-        'PictureBox1
-        '
-        Me.PictureBox1.Cursor = System.Windows.Forms.Cursors.Hand
-        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
-        Me.PictureBox1.Location = New System.Drawing.Point(12, 12)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(444, 447)
-        Me.PictureBox1.TabIndex = 0
-        Me.PictureBox1.TabStop = False
         '
         'TabControl1
         '
@@ -143,6 +123,26 @@ Partial Class frmMain
         Me.chBlack.Text = "Black"
         Me.chBlack.Width = 100
         '
+        'pbReduire
+        '
+        Me.pbReduire.BackgroundImage = Global.TestGraphic.My.Resources.Resources.reduire0
+        Me.pbReduire.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
+        Me.pbReduire.Location = New System.Drawing.Point(832, 37)
+        Me.pbReduire.Name = "pbReduire"
+        Me.pbReduire.Size = New System.Drawing.Size(26, 17)
+        Me.pbReduire.TabIndex = 12
+        Me.pbReduire.TabStop = False
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.Cursor = System.Windows.Forms.Cursors.Hand
+        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
+        Me.PictureBox1.Location = New System.Drawing.Point(12, 12)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(444, 447)
+        Me.PictureBox1.TabIndex = 0
+        Me.PictureBox1.TabStop = False
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -155,10 +155,10 @@ Partial Class frmMain
         Me.Name = "frmMain"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "ChessboARDuino VB"
-        CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage1.ResumeLayout(False)
+        CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub

@@ -43,7 +43,6 @@
     Public ThePOS As ObjFenMoves
 
 
-
 #Region "Fonction de dessin"
 
     'retourne le bitmap correspondant à la piece d'une notation FEN
@@ -138,13 +137,13 @@
     End Sub
 
     'dessine un cercle sur une case TODO test pour la suite
-    Private Sub PutCircle(ByVal sqIndex As Byte, ByVal Initiale As Char)
+    Private Sub PutCircle(ByVal sqIndex As Byte)
         Dim rect As Rectangle
         Dim p As Graphics = PictureBox1.CreateGraphics
-        rect.X = Xsqi(sqIndex) + PieceSize / 20
-        rect.Y = Ysqi(sqIndex) + PieceSize / 20
-        rect.Width = PieceSize - PieceSize / 10
-        rect.Height = PieceSize - PieceSize / 10
+        rect.X = Xsqi(sqIndex) + PieceSize / 10
+        rect.Y = Ysqi(sqIndex) + PieceSize / 10
+        rect.Width = PieceSize - PieceSize / 5
+        rect.Height = PieceSize - PieceSize / 5
 
         Dim trnsRedBrush As New SolidBrush(Color.FromArgb(128, 255, 0, 0))
         ' Create pen.
@@ -160,11 +159,14 @@
         Dim rect As Rectangle
         Dim pt As Point
 
+        'place la pb dans le coin
         PictureBox1.Top = 10
         PictureBox1.Left = 10
 
+        'dimension de la pb en fonction de la hauteur
         PictureBox1.Height = Me.ClientSize.Height - 20
         PictureBox1.Width = Me.ClientSize.Height - 20
+
 
         PictureBox1.Image = New Bitmap(PictureBox1.Width, PictureBox1.Height)
 
@@ -274,7 +276,7 @@
 #Region "Evenement de la form1"
 
     Private Sub Form1_Activated(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Activated
-        DrawPiece()
+        ' DrawPiece()
     End Sub
 
     Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
@@ -314,6 +316,11 @@
         Static MustRedraw As Boolean
         pbReduire.Visible = False
 
+        If (Me.ClientSize.Height - 20 - 36) Mod 8 <> 0 Then
+            Debug.Print(Me.ClientSize.Height - 20 - 36)
+            Me.Height = Me.Height + ((Me.ClientSize.Height - 20 - 36) Mod 8)
+        End If
+
         Select Case Me.WindowState
             Case FormWindowState.Maximized
                 Me.FormBorderStyle = Windows.Forms.FormBorderStyle.None
@@ -347,23 +354,65 @@
 #Region "Evenement de la picturebox1"
 
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
-        Dim sqI As String
+        Dim str_name_square As String
+        Dim cursor_pos As Point
+        Dim b_index_square As Byte
+
+        'récupère le nom de la case sur lequel le curseur se trouve
+        str_name_square = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
+                + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+
+        b_index_square = (Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8) + 1) + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)) * 10
 
         If e.Button = MouseButtons.Left Then
 
-            'récupère le nom de la case sur lequel le curseur se trouve
-            sqI = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
-                    + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+            Dim pt_square_clicked As Point
+            pt_square_clicked.x = Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)
+            pt_square_clicked.Y = Math.Truncate((e.Y - 18) / (PictureBox1.Width - 36) * 8)
+
+            Dim pt_center_square_clicked As Point
+            With pt_center_square_clicked
+                .X = 18 + (pt_square_clicked.X + 0.5) * PieceSize
+                .Y = 18 + (pt_square_clicked.Y + 0.5) * PieceSize
+            End With
+
+            Dim pt_diff_with_center As Point
+
+            With pt_diff_with_center
+                .X = e.X - pt_center_square_clicked.X
+                .Y = e.Y - pt_center_square_clicked.Y
+            End With
+
+            cursor_pos.X = Cursor.Position.X - pt_diff_with_center.X
+            cursor_pos.Y = Cursor.Position.Y - pt_diff_with_center.Y
+
+            Cursor.Position = cursor_pos
+
+
+
+
+
+
+            If ThePOS.Board10x10(b_index_square) <> " " Then
+                'Dim center_square As Point
+                'center_square.X =
+                'center_square.Y =
+                'Cursor.Position =
+                Cursor = New Cursor(CType(New Bitmap(bmpPiece(ThePOS.Board10x10(b_index_square)).GetThumbnailImage(PieceSize, PieceSize, Nothing, IntPtr.Zero)), Bitmap).GetHicon())
+            Else
+                Cursor = Cursors.Hand
+            End If
 
             If sqFrom = "" Then
-                sqFrom = sqI
+                sqFrom = str_name_square
                 DrawMove()
             Else
-                If sqFrom <> sqI Then
+                If sqFrom <> str_name_square Then
                     sqTo = sqFrom
                 End If
             End If
-
+        Else
+            PutCircle(b_index_square)
         End If
     End Sub
 
@@ -373,6 +422,8 @@
         'récupère le nom de la case sur lequel le curseur se trouve
         sqI = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
                     + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
+
+        Cursor = Cursors.Hand
 
         'si on a changé de case depuis mousedown
         'déplacement par drag&drop
