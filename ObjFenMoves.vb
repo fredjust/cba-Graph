@@ -56,7 +56,7 @@
         Empty = 0
         White = 1
         Black = 2
-        Border = 3      'en dehors de la palce 11-88
+        Border = 3      'en dehors de la place 11-88
         OutOfBounds = 4 'en dehors de la place 0-99
     End Enum
 
@@ -110,15 +110,15 @@
         Dim NumCol As Integer
         Dim LaLigne As String
 
-
-
         'on place des bords partout
         For NumLigne = 0 To 99
             Board10x10(NumLigne) = "*"
         Next
 
+        'sépare les lignes
         lignes = FEN_Champ1.Split("/")
 
+        'a t on 8 lignes ?
         If lignes.Count <> 8 Then
             Return 10
         End If
@@ -127,6 +127,7 @@
 
             LaLigne = lignes(NumLigne)
 
+            'remplace les nombres par leur équivalent en espace
             LaLigne = LaLigne.Replace("1", " ")
             LaLigne = LaLigne.Replace("2", "  ")
             LaLigne = LaLigne.Replace("3", "   ")
@@ -136,6 +137,7 @@
             LaLigne = LaLigne.Replace("7", "       ")
             LaLigne = LaLigne.Replace("8", "        ")
 
+            'rempli le tableau avec les lettres du fen ou un espace si vide
             If LaLigne.Length = 8 Then
                 For NumCol = 0 To 7
                     Board10x10((8 - NumLigne) * 10 + (NumCol + 1)) = LaLigne.Substring(NumCol, 1)
@@ -146,6 +148,7 @@
 
         Next
 
+        'tout est OK
         Return 0
 
     End Function
@@ -233,6 +236,10 @@
                 Return ColorPiece.Black
             Case ColorPiece.Black
                 Return ColorPiece.White
+            Case ColorPiece.Border
+                Return ColorPiece.Border
+            Case ColorPiece.Empty
+                Return ColorPiece.Empty
             Case Else
                 Return ColorPiece.OutOfBounds
         End Select
@@ -443,15 +450,20 @@
 
 
     'DEPLACEMENT D UN PION
-    'LA PRISE EN PASSANT ET GEREE
+    'LA PRISE EN PASSANT EST GEREE
     Private Function Pmoves(ByVal sqIndex As Byte) As String
         Dim TempoMoves As String = ""
 
         If ColorOf(sqIndex) = 1 Then
             AddMove(sqIndex + dpl.UP, sqIndex, TempoMoves, False)
 
+
             If sqIndex < 29 And TempoMoves <> "" Then
-                AddMove(sqIndex + 2 * dpl.UP, sqIndex, TempoMoves, False)
+                'la case devant le pion doit etre vide pour qu'il puisse avancer de deux !
+                If Board10x10(sqIndex + dpl.UP) = " " Then
+                    AddMove(sqIndex + 2 * dpl.UP, sqIndex, TempoMoves, False)
+                End If
+
             End If
 
             AddTake(sqIndex + dpl.UP_LEFT, sqIndex, TempoMoves)
@@ -462,7 +474,10 @@
         If ColorOf(sqIndex) = 2 Then
             AddMove(sqIndex + dpl.DOWN, sqIndex, TempoMoves, False)
             If sqIndex > 70 And TempoMoves <> "" Then
-                AddMove(sqIndex + 2 * dpl.DOWN, sqIndex, TempoMoves, False)
+                'la case devant le pion doit etre vide pour qu'il puisse avancer de deux !
+                If Board10x10(sqIndex + dpl.DOWN) = " " Then
+                    AddMove(sqIndex + 2 * dpl.DOWN, sqIndex, TempoMoves, False)
+                End If
             End If
 
             AddTake(sqIndex + dpl.DOWN_LEFT, sqIndex, TempoMoves)
@@ -718,8 +733,17 @@
             strFEN &= IIf(.WhiteCanDoBig, "Q", "")
             strFEN &= IIf(.BlackCanDoLittle, "k", "")
             strFEN &= IIf(.BlackCanDoBig, "q", "")
-            strFEN &= IIf(.BlackCanDoBig Or .BlackCanDoLittle _
-                          Or .WhiteCanDoBig Or .WhiteCanDoLittle, "", "-")
+            'si aucun roque n'est possible
+            If Not .BlackCanDoBig Then
+                If Not .BlackCanDoLittle Then
+                    If Not .WhiteCanDoBig Then
+                        If Not .WhiteCanDoLittle Then
+                            strFEN &= "-"
+                        End If
+                    End If
+                End If
+            End If
+            'strFEN &= IIf(.BlackCanDoBig Or .BlackCanDoLittle Or .WhiteCanDoBig Or .WhiteCanDoLittle, "", "-")
             strFEN &= " "
             strFEN &= IIf(aFEN.sqiEnPassant <> 0, SquareName(aFEN.sqiEnPassant), "-")
             strFEN &= " "

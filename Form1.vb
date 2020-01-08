@@ -1,4 +1,8 @@
-﻿Public Class frmMain
+﻿Option Explicit On
+
+Imports System.Drawing.Drawing2D
+
+Public Class frmMain
 
     'FredJust@gmail.com
 
@@ -27,7 +31,9 @@
     Dim GreenCross As New Bitmap(My.Resources.pg)
 #End Region
 
-    Dim PieceSize As Integer
+
+    Dim TheScreenBoard As New ScreenBoard
+
 
     'graphic sur la picturebox
     'je ne comprends pas trop comment cela fonctionne vraiment
@@ -44,6 +50,7 @@
 
 
 #Region "Fonction de dessin"
+
 
     'retourne le bitmap correspondant à la piece d'une notation FEN
     Private Function bmpPiece(ByVal name As Char) As Bitmap
@@ -86,52 +93,19 @@
         End Select
     End Function
 
-    'retourne la position X en pixel de la case dans la fenetre a partir d'un numero de case
-    Private Function Xsqi(ByVal sqi As Byte) As Integer
-        Dim colonne As Byte
-        Dim ligne As Byte
-
-        colonne = sqi Mod 10
-        ligne = sqi \ 10
-
-        Return 18 + (colonne - 1) * PieceSize
-
-    End Function
-
-    'retourne la position Y en pixel de la case dans la fenetre a partir d'un numero de case
-    Private Function Ysqi(ByVal sqi As Byte) As Integer
-        Dim colonne As Byte
-        Dim ligne As Byte
-
-        colonne = sqi Mod 10
-        ligne = sqi \ 10
-
-        Return 18 + (8 - ligne) * PieceSize
-
-    End Function
-
     'dessine une pièce sur une case
     Private Sub PutPiece(ByVal sqIndex As Byte, ByVal Initiale As Char)
-        Dim rect As Rectangle
-        rect.X = Xsqi(sqIndex)
-        rect.Y = Ysqi(sqIndex)
-        rect.Width = PieceSize
-        rect.Height = PieceSize
 
-        gr_chessboard.DrawImage(bmpPiece(Initiale), rect)
+        gr_chessboard.DrawImage(bmpPiece(Initiale), TheScreenBoard.rect_square(sqIndex))
 
     End Sub
 
     'dessine un symbole sur une case
     Private Sub PutSymbol(ByVal sqIndex As Byte, ByVal Initiale As Char)
-        Dim rect As Rectangle
-        Dim p As Graphics = PictureBox1.CreateGraphics
-        rect.X = Xsqi(sqIndex)
-        rect.Y = Ysqi(sqIndex)
-        rect.Width = PieceSize
-        rect.Height = PieceSize
 
-        p.DrawImage(bmpPiece(Initiale), rect)
+        Dim p As Graphics = PictureBox1.CreateGraphics
+
+        p.DrawImage(bmpPiece(Initiale), TheScreenBoard.rect_square(sqIndex))
 
     End Sub
 
@@ -139,16 +113,64 @@
     Private Sub PutCircle(ByVal sqIndex As Byte)
         Dim rect As Rectangle
         Dim p As Graphics = PictureBox1.CreateGraphics
-        rect.X = Xsqi(sqIndex) + PieceSize / 10
-        rect.Y = Ysqi(sqIndex) + PieceSize / 10
-        rect.Width = PieceSize - PieceSize / 5
-        rect.Height = PieceSize - PieceSize / 5
+        rect.X = TheScreenBoard.rect_square(sqIndex).X '+ TheScreenBoard.size_square
+        rect.Y = TheScreenBoard.rect_square(sqIndex).Y '+ TheScreenBoard.size_square
+        rect.Width = TheScreenBoard.size_square '- TheScreenBoard.size_square
+        rect.Height = TheScreenBoard.size_square '- TheScreenBoard.size_square
 
         Dim trnsRedBrush As New SolidBrush(Color.FromArgb(128, 255, 0, 0))
         ' Create pen.
-        Dim aPen As New Pen(trnsRedBrush, PieceSize / 10)
+        Dim aPen As New Pen(trnsRedBrush, 1) '  TheScreenBoard.size_square / 10)
 
         p.DrawEllipse(aPen, rect)
+
+    End Sub
+
+    'dessine un rectangle sur une case 
+    Private Sub PutRect(ByVal sqIndex As Byte)
+        Dim rect As Rectangle
+        Dim p As Graphics = PictureBox1.CreateGraphics
+        rect.X = TheScreenBoard.rect_square(sqIndex).X '+ TheScreenBoard.size_square
+        rect.Y = TheScreenBoard.rect_square(sqIndex).Y '+ TheScreenBoard.size_square
+        rect.Width = TheScreenBoard.size_square '- TheScreenBoard.size_square
+        rect.Height = TheScreenBoard.size_square '- TheScreenBoard.size_square
+
+        Dim trnsRedBrush As New SolidBrush(Color.FromArgb(128, 0, 255, 255))
+        ' Create pen.
+        Dim aPen As New Pen(trnsRedBrush, 1) '  TheScreenBoard.size_square / 10)
+
+        p.FillRectangle(trnsRedBrush, rect)
+        'Dim aReg As New Region(rect)
+
+
+    End Sub
+
+    'dessine un cercle dans un carré sur une case 
+    Private Sub PutReg(ByVal sqIndex As Byte)
+        Dim rect As Rectangle
+        Dim grPath As New GraphicsPath
+        Dim p As Graphics = PictureBox1.CreateGraphics
+        rect.X = TheScreenBoard.rect_square(sqIndex).X '+ TheScreenBoard.size_square
+        rect.Y = TheScreenBoard.rect_square(sqIndex).Y '+ TheScreenBoard.size_square
+        rect.Width = TheScreenBoard.size_square '- TheScreenBoard.size_square
+        rect.Height = TheScreenBoard.size_square '- TheScreenBoard.size_square
+
+        Dim trnsRedBrush As New SolidBrush(Color.FromArgb(128, 0, 255, 255))
+        ' Create pen.
+        Dim aPen As New Pen(trnsRedBrush, 1) '  TheScreenBoard.size_square / 10)
+
+        'p.FillRectangle(trnsRedBrush, rect)
+        Dim aRegC As New Region(rect)
+        'Dim aRegC As New Region(grPath)
+
+        grPath.AddEllipse(rect)
+
+        aRegC.Xor(grPath)
+
+
+
+
+        p.FillRegion(trnsRedBrush, aRegC)
 
     End Sub
 
@@ -172,29 +194,39 @@
         bmp_backBuffer = New Bitmap(PictureBox1.Width, PictureBox1.Height)
         gr_chessboard = Graphics.FromImage(bmp_backBuffer)
 
-        pt.X = 1 : pt.Y = 1 : gr_chessboard.DrawImage(bHaut, pt)                        'dessine le bord haut
-        pt.X = 1 : pt.Y = PictureBox1.Height - 17 : gr_chessboard.DrawImage(bHaut, pt)  'dessine le bord bas
-        pt.X = 1 : pt.Y = 1 : gr_chessboard.DrawImage(bCote, pt)                        'dessine le bord gauche
-        pt.X = PictureBox1.Width - 17 : pt.Y = 1 : gr_chessboard.DrawImage(bCote, pt)   'dessine le bord droit
+        'dessine le bord haut
+        pt.X = 1 : pt.Y = 1 : gr_chessboard.DrawImage(bHaut, pt)
+        'dessine le bord bas
+        pt.X = 1 : pt.Y = PictureBox1.Height - (TheScreenBoard.size_border - 1) : gr_chessboard.DrawImage(bHaut, pt)
+        'dessine le bord gauche
+        pt.X = 1 : pt.Y = 1 : gr_chessboard.DrawImage(bCote, pt)
+        'dessine le bord droit
+        pt.X = PictureBox1.Width - (TheScreenBoard.size_border - 1) : pt.Y = 1 : gr_chessboard.DrawImage(bCote, pt)
+        'dessine le bord haut
+        pt.X = bHaut.Width - 1 : pt.Y = 1 : gr_chessboard.DrawImage(bHaut, pt)
+        'dessine le bord bas
+        pt.X = bHaut.Width - 1 : pt.Y = PictureBox1.Height - (TheScreenBoard.size_border - 1) : gr_chessboard.DrawImage(bHaut, pt)
+        'dessine le bord gauche
+        pt.X = 1 : pt.Y = bCote.Height - 1 : gr_chessboard.DrawImage(bCote, pt)
+        'dessine le bord droit
+        pt.X = PictureBox1.Width - (TheScreenBoard.size_border - 1) : pt.Y = bCote.Height - 1 : gr_chessboard.DrawImage(bCote, pt)
 
-        pt.X = bHaut.Width - 1 : pt.Y = 1 : gr_chessboard.DrawImage(bHaut, pt)                        'dessine le bord haut
-        pt.X = bHaut.Width - 1 : pt.Y = PictureBox1.Height - 17 : gr_chessboard.DrawImage(bHaut, pt)  'dessine le bord bas
-        pt.X = 1 : pt.Y = bCote.Height - 1 : gr_chessboard.DrawImage(bCote, pt)                        'dessine le bord gauche
-        pt.X = PictureBox1.Width - 17 : pt.Y = bCote.Height - 1 : gr_chessboard.DrawImage(bCote, pt)   'dessine le bord droit
+        'dessine l'échiquier
+        rect.X = TheScreenBoard.size_border : rect.Y = TheScreenBoard.size_border
+        rect.Width = PictureBox1.Width - TheScreenBoard.size_border * 2 : rect.Height = PictureBox1.Height - TheScreenBoard.size_border * 2
+        gr_chessboard.DrawImage(bboard, rect)
 
-        rect.X = 18 : rect.Y = 18
-        rect.Width = PictureBox1.Width - 36 : rect.Height = PictureBox1.Height - 36
-        gr_chessboard.DrawImage(bboard, rect)                                           'dessine l'échiquier
-
+        'dessine le filet exterieur 
         rect.X = 0 : rect.Y = 0
         rect.Width = PictureBox1.Width - 1 : rect.Height = PictureBox1.Height - 1
-        gr_chessboard.DrawRectangle(Pens.Brown, rect)                                   'dessine le filet exterieur 
+        gr_chessboard.DrawRectangle(Pens.Brown, rect)
 
-        rect.X = 17 : rect.Y = 17
-        rect.Width = PictureBox1.Width - 35 : rect.Height = PictureBox1.Height - 35
-        gr_chessboard.DrawRectangle(Pens.Black, rect)                                   'dessine le filet intérieur
+        'dessine le filet intérieur
+        rect.X = TheScreenBoard.size_border - 1 : rect.Y = TheScreenBoard.size_border - 1
+        rect.Width = PictureBox1.Width - (TheScreenBoard.size_border * 2 - 1) : rect.Height = PictureBox1.Height - (TheScreenBoard.size_border * 2 - 1)
+        gr_chessboard.DrawRectangle(Pens.Black, rect)
 
-        PieceSize = (PictureBox1.Height - 36) / 8
+        TheScreenBoard.size_square = (PictureBox1.Height - TheScreenBoard.size_border * 2) / 8
 
         With TabControl1
             .Top = 10
@@ -370,13 +402,13 @@
         If e.Button = MouseButtons.Left Then
 
             Dim pt_square_clicked As Point
-            pt_square_clicked.x = Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)
+            pt_square_clicked.X = Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)
             pt_square_clicked.Y = Math.Truncate((e.Y - 18) / (PictureBox1.Width - 36) * 8)
 
             Dim pt_center_square_clicked As Point
             With pt_center_square_clicked
-                .X = 18 + (pt_square_clicked.X + 0.5) * PieceSize
-                .Y = 18 + (pt_square_clicked.Y + 0.5) * PieceSize
+                .X = 18 + (pt_square_clicked.X + 0.5) * TheScreenBoard.size_square
+                .Y = 18 + (pt_square_clicked.Y + 0.5) * TheScreenBoard.size_square
             End With
 
             Dim pt_diff_with_center As Point
@@ -401,7 +433,7 @@
                 'center_square.X =
                 'center_square.Y =
                 'Cursor.Position =
-                Cursor = New Cursor(CType(New Bitmap(bmpPiece(ThePOS.Board10x10(b_index_square)).GetThumbnailImage(PieceSize, PieceSize, Nothing, IntPtr.Zero)), Bitmap).GetHicon())
+                Cursor = New Cursor(CType(New Bitmap(bmpPiece(ThePOS.Board10x10(b_index_square)).GetThumbnailImage(TheScreenBoard.size_square, TheScreenBoard.size_square, Nothing, IntPtr.Zero)), Bitmap).GetHicon())
             Else
                 Cursor = Cursors.Hand
             End If
@@ -415,7 +447,8 @@
                 End If
             End If
         Else
-            PutCircle(b_index_square)
+
+            PutReg(b_index_square)
         End If
     End Sub
 
@@ -431,21 +464,21 @@
         'si on a changé de case depuis mousedown
         'déplacement par drag&drop
         If sqI <> sqFrom Then
-                sqTo = sqI
-                If ThePOS.IsValidMove(sqFrom & sqTo) Then
+            sqTo = sqI
+            If ThePOS.IsValidMove(sqFrom & sqTo) Then
                 AddMove()
                 Debug.Print("DRAW PictureBox1_MouseUp")
-                    DrawPiece()
-                    sqFrom = ""
-                    sqTo = ""
-                Else
-                    sqFrom = ""
-                    sqTo = ""
+                DrawPiece()
+                sqFrom = ""
+                sqTo = ""
+            Else
+                sqFrom = ""
+                sqTo = ""
                 Debug.Print("DRAW PictureBox1_MouseUp")
                 DrawPiece()
 
-                End If
             End If
+        End If
 
 
 
@@ -483,7 +516,7 @@ err:
 
 
 
-                deletenextitem()
+                Deletenextitem()
 
                 If ThePOS.WhiteToPlay Then
                     lvi.Text = ThePOS.MovesPlayed.ToString & "."
@@ -512,9 +545,9 @@ err:
 #End Region
 
 #Region "Evenement listView"
-    Private Sub lvMoves_MouseClick1(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles lvMoves.MouseClick
+    Private Sub lvMoves_MouseClick1(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles lvMoves.MouseClick
         On Error Resume Next
-        If e.X > lvMoves.Columns(0).Width + lvMoves.Columns(2).Width Then
+        If e.X > lvMoves.Columns(0).Width + lvMoves.Columns(1).Width Then
             ThePOS.SetFEN(lvMoves.SelectedItems(0).SubItems(2).Tag)
             EffaceNoir = False
             Debug.Print("DRAW lvMoves_MouseClick1")
@@ -530,7 +563,7 @@ err:
 
 
 #Region "Evenement Bouton reduire"
-
+    'gestion d'un bouton réduire perso nécessaire en mode plein écran
     Private Sub pbReduire_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles pbReduire.Click
         Me.WindowState = FormWindowState.Normal
     End Sub
