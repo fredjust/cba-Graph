@@ -5,13 +5,49 @@
     Public size_square As Integer 'taille d'une case en pixel
     Public size_border As Byte 'taille du contour de l'échiquier
 
+    Public Structure color_sq
+        Dim Alt As Byte
+        Dim Shift As Byte
+        Dim Control As Byte
+    End Structure
+
+    'pas indispensable mais pratique pour refaire tout proprement
+    Public Structure aBoardClic
+        Dim X As Integer 'position X du clic en pixel
+        Dim Y As Integer 'position Y du clic en pixel
+        Dim id_square As Byte 'index de la case cliquée : 23
+        Dim str_Square As String 'nom de la case cliquée : c2
+        Dim RightClic As Boolean 'est ce un clic droit sinon clic normal
+        Dim Alt As Boolean 'bouton alt enfoncé ?
+        Dim Shift As Boolean 'bouton Shift enfoncé ?
+        Dim Control As Boolean 'bouton Control enfoncé ?
+    End Structure
+
+    Public clicDown, clicUp As aBoardClic
+
+    Public Color_square As Color_sq
+
+    'list des symboles de déplacement à dessiner sur l'échiquier sous la forme "e4" & "t"
+    'e4t signifie sur la case e4 se trouve le symbole t (correspondant à un bitmap)
+    Public MoveSymbols As String  'As New List(Of String)
+
+    ''list des symboles de déplacement à dessiner sur l'échiquier sous la forme "e4" & "t"
+    ''e4t signifie sur la case e4 se trouve le symbole t (correspondant à un bitmap)
+    'Public OtherSymbols As String ' As New List(Of String)
+
+    'list des fleches a dessiner sur l'échiquier sous la forme e2e4-R
+    'les deux cases suivit de l'initiale de la couleurs
+    'Red Green Blue Cyan Magenta Yelow White Noir
+    Public Arrows As New List(Of String)
+
+
     'renvoie l'INDEX d'une case a partir de son nom 
     'SquareIndex(xy)=10*y+x
     ' exemple :
     '   SquareIndex(a1)=11
     '   SquareIndex(h8)=88
     'ou 0 en cas d'erreur
-    Private Function index_Square(ByVal sqName As String) As Byte
+    Public Function index_Square(ByVal sqName As String) As Byte
         Dim lettre As Char
         Dim colonne As Byte
         Dim ligne As Byte
@@ -60,12 +96,19 @@
     End Function
 
     'renvoie le centre d'une case
-    Public Function pt_center(ByVal index_square As Byte) As Point
+    Public Function pt_center(ByVal square) As Point
         Dim pt_tempo As Point
+        Dim id_square As Byte
+
+        If TypeOf square Is String Then
+            id_square = index_square(square)
+        Else
+            id_square = CByte(square)
+        End If
 
         With pt_tempo
-            .X = rect_square(index_square).X + size_square \ 2
-            .Y = rect_square(index_square).Y + size_square \ 2
+            .X = rect_square(id_square).X + size_square \ 2
+            .Y = rect_square(id_square).Y + size_square \ 2
 
         End With
 

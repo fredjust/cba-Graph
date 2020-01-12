@@ -72,6 +72,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoardPositions.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -100,6 +101,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
@@ -187,6 +189,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\bleu2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\square.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\square.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\board100.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

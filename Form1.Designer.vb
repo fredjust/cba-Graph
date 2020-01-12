@@ -34,12 +34,25 @@ Partial Class frmMain
         Me.chCoup = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chWhite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.chBlack = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.TabPage2 = New System.Windows.Forms.TabPage()
         Me.pbReduire = New System.Windows.Forms.PictureBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.lvPositions = New System.Windows.Forms.ListView()
+        Me.tvPositions = New System.Windows.Forms.TreeView()
+        Me.ColumnHeader1 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader2 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader3 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader4 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader5 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader6 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader7 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
+        Me.TabPage2.SuspendLayout()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TabPage3.SuspendLayout()
         Me.SuspendLayout()
         '
         'mnGetRec
@@ -75,10 +88,12 @@ Partial Class frmMain
         'TabControl1
         '
         Me.TabControl1.Controls.Add(Me.TabPage1)
+        Me.TabControl1.Controls.Add(Me.TabPage2)
+        Me.TabControl1.Controls.Add(Me.TabPage3)
         Me.TabControl1.Location = New System.Drawing.Point(484, 12)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(323, 352)
+        Me.TabControl1.Size = New System.Drawing.Size(487, 543)
         Me.TabControl1.TabIndex = 14
         '
         'TabPage1
@@ -87,15 +102,14 @@ Partial Class frmMain
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(315, 326)
+        Me.TabPage1.Size = New System.Drawing.Size(479, 517)
         Me.TabPage1.TabIndex = 0
-        Me.TabPage1.Text = "Formulaire"
+        Me.TabPage1.Text = "Moves"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
         'lvMoves
         '
         Me.lvMoves.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.chCoup, Me.chWhite, Me.chBlack})
-        Me.lvMoves.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvMoves.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lvMoves.FullRowSelect = True
         Me.lvMoves.GridLines = True
@@ -103,7 +117,7 @@ Partial Class frmMain
         Me.lvMoves.Location = New System.Drawing.Point(3, 3)
         Me.lvMoves.MultiSelect = False
         Me.lvMoves.Name = "lvMoves"
-        Me.lvMoves.Size = New System.Drawing.Size(309, 320)
+        Me.lvMoves.Size = New System.Drawing.Size(218, 422)
         Me.lvMoves.TabIndex = 14
         Me.lvMoves.UseCompatibleStateImageBehavior = False
         Me.lvMoves.View = System.Windows.Forms.View.Details
@@ -116,18 +130,29 @@ Partial Class frmMain
         'chWhite
         '
         Me.chWhite.Text = "White"
-        Me.chWhite.Width = 100
+        Me.chWhite.Width = 80
         '
         'chBlack
         '
         Me.chBlack.Text = "Black"
-        Me.chBlack.Width = 100
+        Me.chBlack.Width = 80
+        '
+        'TabPage2
+        '
+        Me.TabPage2.Controls.Add(Me.lvPositions)
+        Me.TabPage2.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage2.Name = "TabPage2"
+        Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage2.Size = New System.Drawing.Size(479, 517)
+        Me.TabPage2.TabIndex = 1
+        Me.TabPage2.Text = "Positions"
+        Me.TabPage2.UseVisualStyleBackColor = True
         '
         'pbReduire
         '
         Me.pbReduire.BackgroundImage = Global.TestGraphic.My.Resources.Resources.reduire0
         Me.pbReduire.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
-        Me.pbReduire.Location = New System.Drawing.Point(832, 37)
+        Me.pbReduire.Location = New System.Drawing.Point(254, 486)
         Me.pbReduire.Name = "pbReduire"
         Me.pbReduire.Size = New System.Drawing.Size(26, 17)
         Me.pbReduire.TabIndex = 12
@@ -143,6 +168,67 @@ Partial Class frmMain
         Me.PictureBox1.TabIndex = 0
         Me.PictureBox1.TabStop = False
         '
+        'TabPage3
+        '
+        Me.TabPage3.Controls.Add(Me.tvPositions)
+        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Name = "TabPage3"
+        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage3.Size = New System.Drawing.Size(479, 517)
+        Me.TabPage3.TabIndex = 2
+        Me.TabPage3.Text = "Tree"
+        Me.TabPage3.UseVisualStyleBackColor = True
+        '
+        'lvPositions
+        '
+        Me.lvPositions.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.ColumnHeader1, Me.ColumnHeader2, Me.ColumnHeader3, Me.ColumnHeader7, Me.ColumnHeader4, Me.ColumnHeader5, Me.ColumnHeader6})
+        Me.lvPositions.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.lvPositions.FullRowSelect = True
+        Me.lvPositions.GridLines = True
+        Me.lvPositions.HideSelection = False
+        Me.lvPositions.Location = New System.Drawing.Point(3, 3)
+        Me.lvPositions.Name = "lvPositions"
+        Me.lvPositions.Size = New System.Drawing.Size(473, 511)
+        Me.lvPositions.TabIndex = 0
+        Me.lvPositions.UseCompatibleStateImageBehavior = False
+        Me.lvPositions.View = System.Windows.Forms.View.Details
+        '
+        'tvPositions
+        '
+        Me.tvPositions.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvPositions.Location = New System.Drawing.Point(3, 3)
+        Me.tvPositions.Name = "tvPositions"
+        Me.tvPositions.Size = New System.Drawing.Size(473, 511)
+        Me.tvPositions.TabIndex = 0
+        '
+        'ColumnHeader1
+        '
+        Me.ColumnHeader1.Text = "Num"
+        '
+        'ColumnHeader2
+        '
+        Me.ColumnHeader2.Text = "Next"
+        '
+        'ColumnHeader3
+        '
+        Me.ColumnHeader3.Text = "Last"
+        '
+        'ColumnHeader4
+        '
+        Me.ColumnHeader4.Text = "Symbols"
+        '
+        'ColumnHeader5
+        '
+        Me.ColumnHeader5.Text = "FEN"
+        '
+        'ColumnHeader6
+        '
+        Me.ColumnHeader6.Text = "Comments"
+        '
+        'ColumnHeader7
+        '
+        Me.ColumnHeader7.Text = "Arrows"
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -157,8 +243,10 @@ Partial Class frmMain
         Me.Text = "ChessboARDuino VB"
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage1.ResumeLayout(False)
+        Me.TabPage2.ResumeLayout(False)
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TabPage3.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -175,5 +263,16 @@ Partial Class frmMain
     Friend WithEvents chCoup As System.Windows.Forms.ColumnHeader
     Friend WithEvents chWhite As System.Windows.Forms.ColumnHeader
     Friend WithEvents chBlack As System.Windows.Forms.ColumnHeader
+    Friend WithEvents TabPage2 As System.Windows.Forms.TabPage
+    Friend WithEvents lvPositions As System.Windows.Forms.ListView
+    Friend WithEvents ColumnHeader1 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader2 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader3 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents TabPage3 As System.Windows.Forms.TabPage
+    Friend WithEvents tvPositions As System.Windows.Forms.TreeView
+    Friend WithEvents ColumnHeader4 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader5 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader6 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader7 As System.Windows.Forms.ColumnHeader
 
 End Class
