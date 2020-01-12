@@ -21,6 +21,8 @@
         Dim Alt As Boolean 'bouton alt enfoncé ?
         Dim Shift As Boolean 'bouton Shift enfoncé ?
         Dim Control As Boolean 'bouton Control enfoncé ?
+
+        
     End Structure
 
     Public clicDown, clicUp As aBoardClic

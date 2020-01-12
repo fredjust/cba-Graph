@@ -31,7 +31,9 @@ Imports System.Drawing.Imaging
 
 Public Class frmMain
 
+    'TODO A PLACER DANS BoardPositions
     Public pos_current As BoardPositions.aPosition
+
 
 #Region "Les Images PNG"
     Dim wp As New Bitmap(My.Resources.wp)
@@ -76,45 +78,60 @@ Public Class frmMain
     Public ThePOS As ObjFenMoves
 
 #Region "gestion des string list"
-    'ajoute un symbole ou le remplace
-
+    'ajoute un symbole, le remplace ou l'efface dans pos_current
     Public Sub AddOtherSymbol(ByVal str_square As String, ByVal str_color As String)
         Dim toDel As Integer
 
-        If pos_current.Symbols.Contains(str_square & "-" & str_color) Then
-            toDel = pos_current.Symbols.IndexOf(str_square)
-            pos_current.Symbols = pos_current.Symbols.Remove(toDel, 5)
-        Else
-            If pos_current.Symbols.Contains(str_square) Then
-                toDel = pos_current.Symbols.IndexOf(str_square)
-                pos_current.Symbols = pos_current.Symbols.Remove(toDel, 5)
-                pos_current.Symbols &= str_square & "-" & str_color & " "
+
+        With pos_current
+
+            If .Symbols.Contains(str_square & "-" & str_color) Then
+                'il existe avec la meme couleur on l'efface
+                toDel = .Symbols.IndexOf(str_square)
+                .Symbols = .Symbols.Remove(toDel, 5)
             Else
-                pos_current.Symbols &= str_square & "-" & str_color & " "
+                If .Symbols.Contains(str_square) Then
+                    'il existe avec une couleur différente on le remplace
+                    toDel = .Symbols.IndexOf(str_square)
+                    .Symbols = .Symbols.Remove(toDel, 5)
+                    .Symbols &= str_square & "-" & str_color & " "
+                Else
+                    'il existe pas on l'ajoute
+                    .Symbols &= str_square & "-" & str_color & " "
+                End If
             End If
-        End If
+
+        End With
+        update_Pos_LV(pos_current)
     End Sub
 
+    'ajoute une fèche, la remplace ou l'efface dans pos_current
     Public Sub AddArrow(ByVal str_squares As String, ByVal str_color As String)
         Dim toDel As Integer
 
-        'contient deja cette fleche avec cette couleur on l'efface
-        If pos_current.Arrows.Contains(str_squares & "-" & str_color) Then
-            toDel = pos_current.Arrows.IndexOf(str_squares)
-            pos_current.Arrows = pos_current.Arrows.Remove(toDel, 7)
-        Else 'contient que la fleche on change la couleur
-            If pos_current.Arrows.Contains(str_squares) Then
-                toDel = pos_current.Arrows.IndexOf(str_squares)
-                pos_current.Arrows = pos_current.Arrows.Remove(toDel, 7)
-                pos_current.Arrows &= str_squares & "-" & str_color & " "
-            Else 'la fleche n'y est pas on l'ajoute
-                pos_current.Arrows &= str_squares & "-" & str_color & " "
+
+        With pos_current
+            If .Arrows.Contains(str_squares & "-" & str_color) Then
+                'contient deja cette fleche avec cette couleur on l'efface
+                toDel = .Arrows.IndexOf(str_squares)
+                .Arrows = .Arrows.Remove(toDel, 7)
+            Else
+                If .Arrows.Contains(str_squares) Then
+                    'contient que la fleche on change la couleur
+                    toDel = .Arrows.IndexOf(str_squares)
+                    .Arrows = .Arrows.Remove(toDel, 7)
+                    .Arrows &= str_squares & "-" & str_color & " "
+                Else
+                    'la fleche n'y est pas on l'ajoute
+                    .Arrows &= str_squares & "-" & str_color & " "
+                End If
             End If
-        End If
+        End With
+        update_Pos_LV(pos_current)
     End Sub
 
 #End Region
-    
+
 
 #Region "Fonction de dessin"
 
@@ -174,39 +191,6 @@ Public Class frmMain
         gr_chessboard.DrawImage(bmpPiece(Initiale), TheScreenBoard.rect_square(sqIndex))
     End Sub
 
-    'dessine un cercle sur une case 
-    Private Sub PutCircle(ByVal sqIndex As Byte)
-        Dim rect As Rectangle
-        rect.X = TheScreenBoard.rect_square(sqIndex).X + TheScreenBoard.size_square / 3
-        rect.Y = TheScreenBoard.rect_square(sqIndex).Y + TheScreenBoard.size_square / 3
-        rect.Width = TheScreenBoard.size_square / 3
-        rect.Height = TheScreenBoard.size_square / 3
-
-        Dim trnsRedBrush As New SolidBrush(Color.FromArgb(128, 255, 0, 0))
-
-        Dim aPen As New Pen(trnsRedBrush, 1)
-
-        gr_chessboard.FillEllipse(trnsRedBrush, rect)
-
-    End Sub
-
-    'dessine un rectangle sur une case 
-    Private Sub PutRect(ByVal sqIndex As Byte)
-        Dim rect As Rectangle
-        'Dim p As Graphics = PictureBox1.CreateGraphics
-        rect.X = TheScreenBoard.rect_square(sqIndex).X '+ TheScreenBoard.size_square
-        rect.Y = TheScreenBoard.rect_square(sqIndex).Y '+ TheScreenBoard.size_square
-        rect.Width = TheScreenBoard.size_square '- TheScreenBoard.size_square
-        rect.Height = TheScreenBoard.size_square '- TheScreenBoard.size_square
-
-
-        Dim aBrush As New SolidBrush(Color.FromArgb(128, TheScreenBoard.Color_square.Alt, TheScreenBoard.Color_square.Shift, TheScreenBoard.Color_square.Control))
-        ' Create pen.
-        Dim aPen As New Pen(aBrush, 1)
-
-        gr_chessboard.FillRectangle(aBrush, rect)
-
-    End Sub
 
     'dessine un cercle dans un carré sur une case 
     Private Sub PutReg(ByVal sqIndex As Byte, ByVal cColor As String)
@@ -322,9 +306,10 @@ Public Class frmMain
 
         If TheScreenBoard.MoveSymbols = "" Then Exit Sub
 
-        tempo = TheScreenBoard.MoveSymbols.Split(" ")
+        'supprime le dernier espace génant 
+        tempo = Trim(TheScreenBoard.MoveSymbols).Split(" ")
 
-        For i = 0 To tempo.Count - 2
+        For i = 0 To tempo.Count - 1
             str_sq = tempo(i).Substring(0, 2)
             num_sym = tempo(i).Substring(3, 1)
             DrawSymbol(TheScreenBoard.index_Square(str_sq), num_sym)
@@ -339,11 +324,13 @@ Public Class frmMain
         Dim str_sq As String
         Dim chr_Color As Char
 
+        'pas de symbols on quitte
         If pos_current.Symbols = "" Then Exit Sub
 
-        tempo = pos_current.Symbols.Split(" ")
+        'supprime le dernier espace génant 
+        tempo = Trim(pos_current.Symbols).Split(" ")
 
-        For i = 0 To tempo.Count - 2
+        For i = 0 To tempo.Count - 1
             str_sq = tempo(i).Substring(0, 2)
             chr_Color = tempo(i).Substring(3, 1)
             PutReg(TheScreenBoard.index_Square(str_sq), chr_Color)
@@ -375,13 +362,13 @@ Public Class frmMain
 
         If pos_current.Arrows = "" Then Exit Sub
 
-        tempo = pos_current.Arrows.Split(" ")
+        tempo = Trim(pos_current.Arrows).Split(" ")
 
-        For i = 0 To tempo.Count - 2
+        For i = 0 To tempo.Count - 1
             str_from = tempo(i).Substring(0, 2)
             str_to = tempo(i).Substring(2, 2)
             chr_Color = tempo(i).Substring(5, 1)
-            'TODO rajotuer le décallage
+            'TODO rajouter le décallage
             DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), chr_Color)
         Next
     End Sub
@@ -510,7 +497,8 @@ Public Class frmMain
     Public Sub DrawArrow(ByVal pt_from As Point, ByVal pt_to As Point, _
                           ByVal str_Color As String)
 
-        Const px_size As Byte = 16
+        Dim px_size As Byte
+        px_size = TheScreenBoard.size_square / 100 * 20
         Dim rect_from As Rectangle
 
         Dim pts_list As New List(Of Point)
@@ -811,41 +799,6 @@ Public Class frmMain
 
         End With
 
-
-
-
-
-
-
-        'If e.Button = MouseButtons.Left Then
-
-        'Else
-
-        '    TheScreenBoard.Color_square.Alt = 0
-        '    TheScreenBoard.Color_square.Shift = 0
-        '    TheScreenBoard.Color_square.Control = 0
-
-        '    If Control.ModifierKeys = Keys.Alt Then TheScreenBoard.Color_square.Alt = 255
-        '    If Control.ModifierKeys = Keys.Shift Then TheScreenBoard.Color_square.Shift = 255
-        '    If Control.ModifierKeys = Keys.Control Then TheScreenBoard.Color_square.Control = 255
-
-        '    If Control.ModifierKeys = (Keys.Alt + Keys.Shift) Then
-        '        TheScreenBoard.Color_square.Alt = 255
-        '        TheScreenBoard.Color_square.Shift = 255
-        '    End If
-
-        '    If Control.ModifierKeys = (Keys.Alt + Keys.Control) Then
-        '        TheScreenBoard.Color_square.Alt = 255
-        '        TheScreenBoard.Color_square.Control = 255
-        '    End If
-
-        '    If Control.ModifierKeys = (Keys.Shift + Keys.Control) Then
-        '        TheScreenBoard.Color_square.Shift = 255
-        '        TheScreenBoard.Color_square.Control = 255
-        '    End If
-
-        '    ' PutReg(b_index_square)
-        '        End If
     End Sub
 
     'récupère les infos du clic
@@ -904,7 +857,10 @@ Public Class frmMain
             Else 'clic normal
                 'on tente de déplacer une piece
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
-                    AddMove(sqFrom, sqTo)
+                    If AddMove(sqFrom, sqTo) Then
+                        'le mouvement c'est fait on change de position à la suite d'un mouvement
+                        change_Pos_move(sqFrom, sqTo)
+                    End If
 
                 End If
             End If
@@ -922,6 +878,8 @@ Public Class frmMain
     End Sub
 
 #End Region
+
+#Region "Gestion des couleurs avec les touches ALT SHIT CTRL"
 
     'renvoie la couleur correspondant aux dernières touches lors du clic
     Public Function cur2color() As Color
@@ -999,6 +957,8 @@ Public Class frmMain
         End Select
     End Function
 
+#End Region
+
 #Region "Gestion des mouvements et de la ListView"
 
     'efface tous les items suivant dans la listview
@@ -1020,14 +980,12 @@ err:
     End Sub
 
     'affiche le mouvement dans la listview lvmoves
-    Private Sub AddMove(ByVal sqFrom As String, ByVal sqTo As String)
+    Private Function AddMove(ByVal sqFrom As String, ByVal sqTo As String) As Boolean
         Dim lvi As New ListViewItem
 
         If sqFrom <> sqTo Then
 
             If ThePOS.IsValidMove(sqFrom & sqTo) Then
-
-
 
                 Deletenextitem()
 
@@ -1045,14 +1003,28 @@ err:
                     lvi.SubItems(2).Tag = ThePOS.GetFEN()
                 End If
 
-
-
                 lvMoves.Items(lvMoves.Items.Count - 1).Selected = True
-
-
-
+                Return True
             End If
         End If
+        Return False
+    End Function
+
+    'changement de position suite a un mouvement (TODO dans un sens ou un autre)
+    'sauvegarder les infos de la positons courante
+    'passer à la suivante en la créant ou en la récupérant dans la collection
+    Public Sub change_Pos_move(ByVal sqFrom As String, ByVal sqTo As String)
+        'effacer les fleches et les cases si on ne les a pas conserver avec appuis sur ALT
+
+        BoardPos.Add_Pos_Col(pos_current)
+
+        'regarde si la position suivante suivante existe dans la collection
+
+        'si oui renvoie cette position
+
+        'si non en créer une nouvelle
+
+
     End Sub
 
 #End Region
@@ -1075,11 +1047,27 @@ err:
 
 #Region "Gestion LVposition"
 
+    'modifie l'affichage d'une position (la courrante) dans la LV
+    Public Sub update_Pos_LV(ByVal aPos As BoardPositions.aPosition)
+
+        With lvPositions.Items(aPos.id & "k")
+            .SubItems(1).Text = aPos.next_pos
+            .SubItems(2).Text = aPos.last_pos
+            .SubItems(3).Text = aPos.Symbols
+            .SubItems(4).Text = aPos.Arrows
+            .SubItems(5).Text = aPos.FEN
+            .SubItems(6).Text = aPos.Comments
+        End With
+
+    End Sub
+
+    'a ne pas utiliser en cas de mise a jour
+    'id de la pos doit correspondre a id de l'item pour une mise a jour
     Public Sub Add_Pos_LV(ByVal aPos As BoardPositions.aPosition)
         Dim NbLigne As Integer
 
-        NbLigne = lvPositions.Items.Count + 1
-        lvPositions.Items.Insert(NbLigne - 1, NbLigne)    'numéro de la position
+        NbLigne = lvPositions.Items.Count
+        lvPositions.Items.Insert(NbLigne, CStr(NbLigne) & "k", CStr(NbLigne) & " id", 0)    'numéro de la position
 
         'Public Comments As String 'x|y|text||x|y|text||...
 
@@ -1087,8 +1075,8 @@ err:
             NbLigne = .Items.Count - 1
             .Items(NbLigne).SubItems.Add(aPos.next_pos)
             .Items(NbLigne).SubItems.Add(aPos.last_pos)
-            .Items(NbLigne).SubItems.Add(aPos.Arrows)
             .Items(NbLigne).SubItems.Add(aPos.Symbols)
+            .Items(NbLigne).SubItems.Add(aPos.Arrows)
             .Items(NbLigne).SubItems.Add(aPos.FEN)
             .Items(NbLigne).SubItems.Add(aPos.Comments)
         End With
@@ -1114,6 +1102,43 @@ err:
 #End Region
 
 
+
+
+#Region "CORBEILLE Fonctions inutilisées "
+    'dessine un cercle sur une case 
+    Private Sub PutCircle(ByVal sqIndex As Byte)
+        Dim rect As Rectangle
+        rect.X = TheScreenBoard.rect_square(sqIndex).X + TheScreenBoard.size_square / 3
+        rect.Y = TheScreenBoard.rect_square(sqIndex).Y + TheScreenBoard.size_square / 3
+        rect.Width = TheScreenBoard.size_square / 3
+        rect.Height = TheScreenBoard.size_square / 3
+
+        Dim trnsRedBrush As New SolidBrush(Color.FromArgb(128, 255, 0, 0))
+
+        Dim aPen As New Pen(trnsRedBrush, 1)
+
+        gr_chessboard.FillEllipse(trnsRedBrush, rect)
+
+    End Sub
+
+    'dessine un rectangle sur une case 
+    Private Sub PutRect(ByVal sqIndex As Byte)
+        Dim rect As Rectangle
+        'Dim p As Graphics = PictureBox1.CreateGraphics
+        rect.X = TheScreenBoard.rect_square(sqIndex).X '+ TheScreenBoard.size_square
+        rect.Y = TheScreenBoard.rect_square(sqIndex).Y '+ TheScreenBoard.size_square
+        rect.Width = TheScreenBoard.size_square '- TheScreenBoard.size_square
+        rect.Height = TheScreenBoard.size_square '- TheScreenBoard.size_square
+
+
+        Dim aBrush As New SolidBrush(Color.FromArgb(128, TheScreenBoard.Color_square.Alt, TheScreenBoard.Color_square.Shift, TheScreenBoard.Color_square.Control))
+        ' Create pen.
+        Dim aPen As New Pen(aBrush, 1)
+
+        gr_chessboard.FillRectangle(aBrush, rect)
+
+    End Sub
+#End Region
 
 
 

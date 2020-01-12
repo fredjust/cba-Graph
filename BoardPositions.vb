@@ -38,13 +38,56 @@
         Return tempo(0)
     End Function
 
+
+    'ajoute une position à la collection 
+    'ou met a jour ses infos si elle existe déjà
+    Public Sub Add_Pos_Col(ByVal aPos As aPosition)
+        Dim pos_tempo As aPosition
+        If col_Positions.Contains(keyFEN(aPos.FEN)) Then
+            'la position existe on met a jour les infos
+            pos_tempo = col_Positions.Item(keyFEN(aPos.FEN))
+            With pos_tempo
+
+            End With
+        Else
+            col_Positions.Add(aPos, keyFEN(aPos.FEN))
+        End If
+
+    End Sub
+
     'initialise la position sur la première position
     Public Sub first_pos(ByRef aPos As aPosition)
         With aPos
-            .id = 1
+            .id = 0
             .last_pos = ""
             .next_pos = ""
             .FEN = IntitFEN
+            .Arrows = ""
+            .Symbols = ""
+            .Comments = ""
+        End With
+    End Sub
+
+    Public Function IdOfFen(ByVal aFen As String) As Integer
+
+        If col_Positions.Contains(keyFEN(aFen)) Then
+            Return col_Positions.Item(keyFEN(aFen)).id
+        Else
+            Return col_Positions.Count
+        End If
+
+
+
+    End Function
+
+
+    'Efface les infos d'une position
+    Public Sub Clear_Pos(ByRef aPos As aPosition)
+        With aPos
+            .id = 0
+            .last_pos = ""
+            .next_pos = ""
+            .FEN = ""
             .Arrows = ""
             .Symbols = ""
             .Comments = ""
