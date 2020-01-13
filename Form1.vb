@@ -32,7 +32,7 @@ Imports System.Drawing.Imaging
 Public Class frmMain
 
     'TODO A PLACER DANS BoardPositions
-    Public pos_current As BoardPositions.aPosition
+
 
 
 #Region "Les Images PNG"
@@ -64,7 +64,7 @@ Public Class frmMain
 
     Dim TheScreenBoard As New ScreenBoard
 
-    Dim BoardPos As New BoardPositions
+    Public WithEvents BoardPos As New BoardPositions
 
     Dim bmp_backBuffer As Bitmap  'New Bitmap(My.Resources.board100)
     Dim gr_chessboard As Graphics ' = Graphics.FromImage(bmp_backBuffer)
@@ -77,60 +77,7 @@ Public Class frmMain
     'mon objet pour gérer les mouvements
     Public ThePOS As ObjFenMoves
 
-#Region "gestion des string list"
-    'ajoute un symbole, le remplace ou l'efface dans pos_current
-    Public Sub AddOtherSymbol(ByVal str_square As String, ByVal str_color As String)
-        Dim toDel As Integer
 
-
-        With pos_current
-
-            If .Symbols.Contains(str_square & "-" & str_color) Then
-                'il existe avec la meme couleur on l'efface
-                toDel = .Symbols.IndexOf(str_square)
-                .Symbols = .Symbols.Remove(toDel, 5)
-            Else
-                If .Symbols.Contains(str_square) Then
-                    'il existe avec une couleur différente on le remplace
-                    toDel = .Symbols.IndexOf(str_square)
-                    .Symbols = .Symbols.Remove(toDel, 5)
-                    .Symbols &= str_square & "-" & str_color & " "
-                Else
-                    'il existe pas on l'ajoute
-                    .Symbols &= str_square & "-" & str_color & " "
-                End If
-            End If
-
-        End With
-        update_Pos_LV(pos_current)
-    End Sub
-
-    'ajoute une fèche, la remplace ou l'efface dans pos_current
-    Public Sub AddArrow(ByVal str_squares As String, ByVal str_color As String)
-        Dim toDel As Integer
-
-
-        With pos_current
-            If .Arrows.Contains(str_squares & "-" & str_color) Then
-                'contient deja cette fleche avec cette couleur on l'efface
-                toDel = .Arrows.IndexOf(str_squares)
-                .Arrows = .Arrows.Remove(toDel, 7)
-            Else
-                If .Arrows.Contains(str_squares) Then
-                    'contient que la fleche on change la couleur
-                    toDel = .Arrows.IndexOf(str_squares)
-                    .Arrows = .Arrows.Remove(toDel, 7)
-                    .Arrows &= str_squares & "-" & str_color & " "
-                Else
-                    'la fleche n'y est pas on l'ajoute
-                    .Arrows &= str_squares & "-" & str_color & " "
-                End If
-            End If
-        End With
-        update_Pos_LV(pos_current)
-    End Sub
-
-#End Region
 
 
 #Region "Fonction de dessin"
@@ -325,10 +272,10 @@ Public Class frmMain
         Dim chr_Color As Char
 
         'pas de symbols on quitte
-        If pos_current.Symbols = "" Then Exit Sub
+        If BoardPos.pos_current.Symbols = "" Then Exit Sub
 
         'supprime le dernier espace génant 
-        tempo = Trim(pos_current.Symbols).Split(" ")
+        tempo = Trim(BoardPos.pos_current.Symbols).Split(" ")
 
         For i = 0 To tempo.Count - 1
             str_sq = tempo(i).Substring(0, 2)
@@ -360,9 +307,9 @@ Public Class frmMain
         Dim str_from, str_to As String
         Dim chr_Color As Char
 
-        If pos_current.Arrows = "" Then Exit Sub
+        If BoardPos.pos_current.Arrows = "" Then Exit Sub
 
-        tempo = Trim(pos_current.Arrows).Split(" ")
+        tempo = Trim(BoardPos.pos_current.Arrows).Split(" ")
 
         For i = 0 To tempo.Count - 1
             str_from = tempo(i).Substring(0, 2)
@@ -370,6 +317,40 @@ Public Class frmMain
             chr_Color = tempo(i).Substring(5, 1)
             'TODO rajouter le décallage
             DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), chr_Color)
+        Next
+    End Sub
+
+    Private Sub DrawAllNextMovesArrows()
+        Dim tempo() As String
+        Dim str_from, str_to As String
+
+
+        If BoardPos.pos_current.next_pos = "" Then Exit Sub
+
+        tempo = Trim(BoardPos.pos_current.next_pos).Split(" ")
+
+        For i = 0 To tempo.Count - 1
+            str_from = tempo(i).Substring(0, 2)
+            str_to = tempo(i).Substring(2, 2)
+            'TODO rajouter le décallage
+            DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), "N")
+        Next
+    End Sub
+
+    Private Sub DrawAllLastMovesArrows()
+        Dim tempo() As String
+        Dim str_from, str_to As String
+
+
+        If BoardPos.pos_current.last_pos = "" Then Exit Sub
+
+        tempo = Trim(BoardPos.pos_current.last_pos).Split(" ")
+
+        For i = 0 To tempo.Count - 1
+            str_from = tempo(i).Substring(0, 2)
+            str_to = tempo(i).Substring(2, 2)
+            'TODO rajouter le décallage
+            DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), "N")
         Next
     End Sub
 
@@ -607,9 +588,14 @@ Public Class frmMain
 
         'dessine les fleches
         DrawAllArrows()
+       
 
         'dessine les pieces
         DrawAllPieces()
+
+
+        DrawAllLastMovesArrows()
+        DrawAllNextMovesArrows()
 
         'raffraichit l'affichage
         PictureBox1.Image = bmp_backBuffer
@@ -653,11 +639,13 @@ Public Class frmMain
         PictureBox1.Top = 10
         PictureBox1.Left = 10
         pbReduire.Top = 10
+
         ThePOS = New ObjFenMoves()
         ThePOS.LocalPiece = "TCFDR"
+
         'initialise la position 
-        BoardPos.first_pos(pos_current)
-        Add_Pos_LV(pos_current)
+        Add_Pos_LV(BoardPos.pos_current)
+
         'TODO remplacer les ressources par des images chargeables
         'wn = Image.FromFile(Application.StartupPath & "\images\bn.png")
     End Sub
@@ -853,26 +841,24 @@ Public Class frmMain
         If sqFrom <> sqTo Then 'si on a changé de case depuis mousedown
             If TheScreenBoard.clicUp.RightClic Then 'si clic droit
                 'on trace une fleche
-                AddArrow(sqFrom & sqTo, cur2str())
+                BoardPos.AddArrow(sqFrom & sqTo, cur2str())
+                update_Pos_LV(BoardPos.pos_current)
             Else 'clic normal
                 'on tente de déplacer une piece
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
                     If AddMove(sqFrom, sqTo) Then
                         'le mouvement c'est fait on change de position à la suite d'un mouvement
-                        change_Pos_move(sqFrom, sqTo)
+                        BoardPos.change_Pos_move(sqFrom, sqTo, ThePOS.GetFEN)
                     End If
-
                 End If
             End If
         Else 'on ne change pas de case
             If TheScreenBoard.clicUp.RightClic Then 'si clic droit
                 'on place un symbole
-                AddOtherSymbol(sqTo, cur2str())
-
+                BoardPos.AddOtherSymbol(sqTo, cur2str())
+                update_Pos_LV(BoardPos.pos_current)
             End If
         End If
-
-
 
         DrawEveryThing()
     End Sub
@@ -954,6 +940,8 @@ Public Class frmMain
                 Return Color.FromArgb(128, 0, 255, 255)
             Case "W"
                 Return Color.FromArgb(128, 255, 255, 255)
+            Case "N"
+                Return Color.FromArgb(64, 0, 0, 0)
         End Select
     End Function
 
@@ -961,7 +949,7 @@ Public Class frmMain
 
 #Region "Gestion des mouvements et de la ListView"
 
-    'efface tous les items suivant dans la listview
+    'efface tous les items suivant l'item selectionné dans la listview
     Public Sub Deletenextitem()
         On Error GoTo err
 
@@ -1010,26 +998,13 @@ err:
         Return False
     End Function
 
-    'changement de position suite a un mouvement (TODO dans un sens ou un autre)
-    'sauvegarder les infos de la positons courante
-    'passer à la suivante en la créant ou en la récupérant dans la collection
-    Public Sub change_Pos_move(ByVal sqFrom As String, ByVal sqTo As String)
-        'effacer les fleches et les cases si on ne les a pas conserver avec appuis sur ALT
-
-        BoardPos.Add_Pos_Col(pos_current)
-
-        'regarde si la position suivante suivante existe dans la collection
-
-        'si oui renvoie cette position
-
-        'si non en créer une nouvelle
-
-
-    End Sub
+   
 
 #End Region
 
 #Region "Evenement listView"
+
+    
     Private Sub lvMoves_MouseClick1(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles lvMoves.MouseClick
         On Error Resume Next
         Debug.Print("BLANC " & lvMoves.Columns(1).Width & " NOIRS " & lvMoves.Columns(2).Width)
@@ -1067,18 +1042,19 @@ err:
         Dim NbLigne As Integer
 
         NbLigne = lvPositions.Items.Count
-        lvPositions.Items.Insert(NbLigne, CStr(NbLigne) & "k", CStr(NbLigne) & " id", 0)    'numéro de la position
+
+        lvPositions.Items.Insert(NbLigne, CStr(aPos.id) & "k", CStr(aPos.id) & " id", 0)    'numéro de la position
 
         'Public Comments As String 'x|y|text||x|y|text||...
 
-        With lvPositions
-            NbLigne = .Items.Count - 1
-            .Items(NbLigne).SubItems.Add(aPos.next_pos)
-            .Items(NbLigne).SubItems.Add(aPos.last_pos)
-            .Items(NbLigne).SubItems.Add(aPos.Symbols)
-            .Items(NbLigne).SubItems.Add(aPos.Arrows)
-            .Items(NbLigne).SubItems.Add(aPos.FEN)
-            .Items(NbLigne).SubItems.Add(aPos.Comments)
+        With lvPositions.Items(NbLigne)
+
+            .SubItems.Add(aPos.next_pos)
+            .SubItems.Add(aPos.last_pos)
+            .SubItems.Add(aPos.Symbols)
+            .SubItems.Add(aPos.Arrows)
+            .SubItems.Add(aPos.FEN)
+            .SubItems.Add(aPos.Comments)
         End With
 
     End Sub
@@ -1140,9 +1116,34 @@ err:
     End Sub
 #End Region
 
+    Private Sub UpdateLVpos() Handles BoardPos.PositionAdded
+
+        lvPositions.Items.Clear()
+
+        For i = 1 To BoardPos.col_Positions.Count
+            Add_Pos_LV(BoardPos.col_Positions(i))
+        Next
+
+    End Sub
+
+    Private Sub lvPositions_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles lvPositions.Click
+        With lvPositions.SelectedItems(0)
+            BoardPos.pos_current.id = .SubItems(0).Text.Replace(" id", "")
+            BoardPos.pos_current.next_pos = .SubItems(1).Text
+            BoardPos.pos_current.last_pos = .SubItems(2).Text
+            BoardPos.pos_current.Symbols = .SubItems(3).Text
+            BoardPos.pos_current.Arrows = .SubItems(4).Text
+            BoardPos.pos_current.FEN = .SubItems(5).Text
+            BoardPos.pos_current.Comments = .SubItems(6).Text
+            ThePOS.SetFEN(BoardPos.pos_current.FEN)
+        End With
+        DrawEveryThing()
+    End Sub
 
 
-    Private Sub PictureBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PictureBox1.Click
+
+   
+    Private Sub lvPositions_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lvPositions.SelectedIndexChanged
 
     End Sub
 End Class
