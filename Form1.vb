@@ -232,8 +232,13 @@ Public Class frmMain
         With TabControl1
             .Top = 10
             .Left = PictureBox1.Left + PictureBox1.Width + 10
-            .Height = Me.ClientSize.Height - .Top - 10
+            .Height = Me.ClientSize.Height - .Top - 10 - lbl_status.Height
             .Width = Me.ClientSize.Width - (PictureBox1.Width + 30)
+        End With
+
+        With lbl_status
+            .Top = TabControl1.Top + TabControl1.Height
+            .Left = TabControl1.Left
         End With
 
         With lvMoves
@@ -272,10 +277,10 @@ Public Class frmMain
         Dim chr_Color As Char
 
         'pas de symbols on quitte
-        If BoardPos.pos_current.Symbols = "" Then Exit Sub
+        If BoardPos.Symbols = "" Then Exit Sub
 
         'supprime le dernier espace génant 
-        tempo = Trim(BoardPos.pos_current.Symbols).Split(" ")
+        tempo = Trim(BoardPos.Symbols).Split(" ")
 
         For i = 0 To tempo.Count - 1
             str_sq = tempo(i).Substring(0, 2)
@@ -307,11 +312,14 @@ Public Class frmMain
         Dim str_from, str_to As String
         Dim chr_Color As Char
 
-        If BoardPos.pos_current.Arrows = "" Then Exit Sub
+        If BoardPos.Arrows = "" Then Exit Sub
 
-        tempo = Trim(BoardPos.pos_current.Arrows).Split(" ")
+        tempo = Trim(BoardPos.Arrows).Split(" ")
+
+
 
         For i = 0 To tempo.Count - 1
+            If tempo(i).Length < 5 Then Exit Sub
             str_from = tempo(i).Substring(0, 2)
             str_to = tempo(i).Substring(2, 2)
             chr_Color = tempo(i).Substring(5, 1)
@@ -325,9 +333,9 @@ Public Class frmMain
         Dim str_from, str_to As String
 
 
-        If BoardPos.pos_current.next_pos = "" Then Exit Sub
+        If BoardPos.next_pos = "" Then Exit Sub
 
-        tempo = Trim(BoardPos.pos_current.next_pos).Split(" ")
+        tempo = Trim(BoardPos.next_pos).Split(" ")
 
         For i = 0 To tempo.Count - 1
             str_from = tempo(i).Substring(0, 2)
@@ -342,9 +350,9 @@ Public Class frmMain
         Dim str_from, str_to As String
 
 
-        If BoardPos.pos_current.last_pos = "" Then Exit Sub
+        If BoardPos.last_pos = "" Then Exit Sub
 
-        tempo = Trim(BoardPos.pos_current.last_pos).Split(" ")
+        tempo = Trim(BoardPos.last_pos).Split(" ")
 
         For i = 0 To tempo.Count - 1
             str_from = tempo(i).Substring(0, 2)
@@ -635,6 +643,15 @@ Public Class frmMain
         GreenCross.Dispose()
     End Sub
 
+    Private Sub frmMain_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles Me.KeyPress
+        Debug.Print(e.KeyChar)
+        Select Case e.KeyChar
+            Case "R"
+                TheScreenBoard.Reversed = Not TheScreenBoard.Reversed
+                DrawEveryThing()
+        End Select
+    End Sub
+
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         PictureBox1.Top = 10
         PictureBox1.Left = 10
@@ -644,7 +661,7 @@ Public Class frmMain
         ThePOS.LocalPiece = "TCFDR"
 
         'initialise la position 
-        Add_Pos_LV(BoardPos.pos_current)
+        Add_Pos_LV(0)
 
         'TODO remplacer les ressources par des images chargeables
         'wn = Image.FromFile(Application.StartupPath & "\images\bn.png")
@@ -718,6 +735,11 @@ Public Class frmMain
             .str_Square = Chr(97 + Math.Truncate((e.X - 18) / (PictureBox1.Width - 36) * 8)) _
                 + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
             .RightClic = (e.Button = MouseButtons.Right)
+
+            If TheScreenBoard.Reversed Then
+                .id_square = ThePOS.SquareIndex(.str_Square, True)
+                .str_Square = ThePOS.SquareName(.id_square, False)
+            End If
 
             .Alt = False
             .Shift = False
@@ -809,6 +831,11 @@ Public Class frmMain
                 + (8 - Math.Truncate((e.Y - 18) / (PictureBox1.Height - 36) * 8)).ToString
             .RightClic = (e.Button = MouseButtons.Right)
 
+            If TheScreenBoard.Reversed Then
+                .id_square = ThePOS.SquareIndex(.str_Square, True)
+                .str_Square = ThePOS.SquareName(.id_square, False)
+            End If
+
             .Alt = False
             .Shift = False
             .Control = False
@@ -842,7 +869,7 @@ Public Class frmMain
             If TheScreenBoard.clicUp.RightClic Then 'si clic droit
                 'on trace une fleche
                 BoardPos.AddArrow(sqFrom & sqTo, cur2str())
-                update_Pos_LV(BoardPos.pos_current)
+                update_Pos_LV()
             Else 'clic normal
                 'on tente de déplacer une piece
                 If ThePOS.IsValidMove(sqFrom & sqTo) Then
@@ -856,7 +883,7 @@ Public Class frmMain
             If TheScreenBoard.clicUp.RightClic Then 'si clic droit
                 'on place un symbole
                 BoardPos.AddOtherSymbol(sqTo, cur2str())
-                update_Pos_LV(BoardPos.pos_current)
+                update_Pos_LV()
             End If
         End If
 
@@ -950,51 +977,35 @@ Public Class frmMain
 #Region "Gestion des mouvements et de la ListView"
 
     'efface tous les items suivant l'item selectionné dans la listview
-    Public Sub Deletenextitem()
-        On Error GoTo err
 
-        If lvMoves.SelectedIndices(0) <> lvMoves.Items.Count - 1 Then
-            While lvMoves.SelectedIndices(0) <> lvMoves.Items.Count - 1
-                lvMoves.Items.RemoveAt(lvMoves.Items.Count - 1)
-            End While
-            If EffaceNoir Then
-                If lvMoves.Items(lvMoves.Items.Count - 1).SubItems.Count = 3 Then
-                    lvMoves.Items(lvMoves.Items.Count - 1).SubItems.RemoveAt(2)
-                End If
-            End If
-        End If
-err:
-
-    End Sub
 
     'affiche le mouvement dans la listview lvmoves
     Private Function AddMove(ByVal sqFrom As String, ByVal sqTo As String) As Boolean
         Dim lvi As New ListViewItem
 
-        If sqFrom <> sqTo Then
 
-            If ThePOS.IsValidMove(sqFrom & sqTo) Then
 
-                Deletenextitem()
 
-                If ThePOS.WhiteToPlay Then
-                    lvi.Text = ThePOS.MovesPlayed.ToString & "."
-                    lvi.SubItems.Add(ThePOS.PGNmove(sqFrom & sqTo))
-                    ThePOS.MakeMove(sqFrom & sqTo)
-                    lvi.SubItems(1).Tag = ThePOS.GetFEN()
-                    lvMoves.Items.Add(lvi)
+        If ThePOS.WhiteToPlay Then
+            BoardPos.Last_SAN = ThePOS.MovesPlayed.ToString & "." & ThePOS.PGNmove(sqFrom & sqTo)
+            lvi.Text = ThePOS.MovesPlayed.ToString & "."
+            lvi.SubItems.Add(ThePOS.PGNmove(sqFrom & sqTo))
+            ThePOS.MakeMove(sqFrom & sqTo)
+            lvi.SubItems(1).Tag = ThePOS.GetFEN()
+            lvMoves.Items.Add(lvi)
 
-                Else
-                    lvi = lvMoves.Items(lvMoves.Items.Count - 1)
-                    lvi.SubItems.Add(ThePOS.PGNmove(sqFrom & sqTo))
-                    ThePOS.MakeMove(sqFrom & sqTo)
-                    lvi.SubItems(2).Tag = ThePOS.GetFEN()
-                End If
-
-                lvMoves.Items(lvMoves.Items.Count - 1).Selected = True
-                Return True
-            End If
+        Else
+            BoardPos.Last_SAN = ThePOS.MovesPlayed.ToString & "... " & ThePOS.PGNmove(sqFrom & sqTo)
+            'lvi = lvMoves.Items(lvMoves.Items.Count - 1)
+            'lvi.SubItems.Add(ThePOS.PGNmove(sqFrom & sqTo))
+            ThePOS.MakeMove(sqFrom & sqTo)
+            'lvi.SubItems(2).Tag = ThePOS.GetFEN()
         End If
+
+        'lvMoves.Items(lvMoves.Items.Count - 1).Selected = True
+        Return True
+
+
         Return False
     End Function
 
@@ -1022,39 +1033,72 @@ err:
 
 #Region "Gestion LVposition"
 
-    'modifie l'affichage d'une position (la courrante) dans la LV
-    Public Sub update_Pos_LV(ByVal aPos As BoardPositions.aPosition)
 
-        With lvPositions.Items(aPos.id & "k")
-            .SubItems(1).Text = aPos.next_pos
-            .SubItems(2).Text = aPos.last_pos
-            .SubItems(3).Text = aPos.Symbols
-            .SubItems(4).Text = aPos.Arrows
-            .SubItems(5).Text = aPos.FEN
-            .SubItems(6).Text = aPos.Comments
+    Private Sub updateLV()
+        lvPositions.Items.Clear()
+
+        For i = 0 To BoardPos.nb_pos - 1
+            Add_Pos_LV(i)
+        Next
+
+        lvPositions.Items(BoardPos.Id).Selected = True
+    End Sub
+
+    Private Sub lvPositions_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lvPositions.SelectedIndexChanged
+
+        On Error GoTo err
+
+        With lvPositions.SelectedItems(0)
+
+            BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
+            BoardPos.SAN = .SubItems(1).Text
+            BoardPos.next_pos = .SubItems(2).Text
+            BoardPos.last_pos = .SubItems(3).Text
+            BoardPos.Symbols = .SubItems(4).Text
+            BoardPos.Arrows = .SubItems(5).Text
+            BoardPos.FEN = .SubItems(6).Text
+            BoardPos.Comments = .SubItems(7).Text
+            ThePOS.SetFEN(BoardPos.FEN)
+        End With
+        DrawEveryThing()
+err:
+
+    End Sub
+
+    'modifie l'affichage d'une position (la courrante) dans la LV
+    Public Sub update_Pos_LV()
+
+        With lvPositions.Items(BoardPos.Id & "k")
+            .SubItems(1).Text = BoardPos.SAN
+            .SubItems(2).Text = BoardPos.next_pos
+            .SubItems(3).Text = BoardPos.last_pos
+            .SubItems(4).Text = BoardPos.Symbols
+            .SubItems(5).Text = BoardPos.Arrows
+            .SubItems(6).Text = BoardPos.FEN
+            .SubItems(7).Text = BoardPos.Comments
         End With
 
     End Sub
 
     'a ne pas utiliser en cas de mise a jour
     'id de la pos doit correspondre a id de l'item pour une mise a jour
-    Public Sub Add_Pos_LV(ByVal aPos As BoardPositions.aPosition)
+    Public Sub Add_Pos_LV(ByVal Id_Pos As Integer)
         Dim NbLigne As Integer
 
         NbLigne = lvPositions.Items.Count
 
-        lvPositions.Items.Insert(NbLigne, CStr(aPos.id) & "k", CStr(aPos.id) & " id", 0)    'numéro de la position
+        lvPositions.Items.Insert(NbLigne, CStr(Id_Pos) & "k", CStr(Id_Pos) & " id", 0)    'numéro de la position
 
         'Public Comments As String 'x|y|text||x|y|text||...
 
         With lvPositions.Items(NbLigne)
-
-            .SubItems.Add(aPos.next_pos)
-            .SubItems.Add(aPos.last_pos)
-            .SubItems.Add(aPos.Symbols)
-            .SubItems.Add(aPos.Arrows)
-            .SubItems.Add(aPos.FEN)
-            .SubItems.Add(aPos.Comments)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).SAN)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).next_pos)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).last_pos)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).Symbols)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).Arrows)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).FEN)
+            .SubItems.Add(BoardPos.col_Positions(Id_Pos).Comments)
         End With
 
     End Sub
@@ -1114,36 +1158,212 @@ err:
         gr_chessboard.FillRectangle(aBrush, rect)
 
     End Sub
+
+    Public Sub Deletenextitem()
+        On Error GoTo err
+
+        If lvMoves.SelectedIndices(0) <> lvMoves.Items.Count - 1 Then
+            While lvMoves.SelectedIndices(0) <> lvMoves.Items.Count - 1
+                lvMoves.Items.RemoveAt(lvMoves.Items.Count - 1)
+            End While
+            If EffaceNoir Then
+                If lvMoves.Items(lvMoves.Items.Count - 1).SubItems.Count = 3 Then
+                    lvMoves.Items(lvMoves.Items.Count - 1).SubItems.RemoveAt(2)
+                End If
+            End If
+        End If
+err:
+
+    End Sub
 #End Region
 
-    Private Sub UpdateLVpos() Handles BoardPos.PositionAdded
 
-        lvPositions.Items.Clear()
 
-        For i = 1 To BoardPos.col_Positions.Count
-            Add_Pos_LV(BoardPos.col_Positions(i))
-        Next
+    Private Sub UpdateDATA() Handles BoardPos.PositionAdded
+        updateLV()
+        UpdateTreeView()
 
     End Sub
 
-    Private Sub lvPositions_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles lvPositions.Click
-        With lvPositions.SelectedItems(0)
-            BoardPos.pos_current.id = .SubItems(0).Text.Replace(" id", "")
-            BoardPos.pos_current.next_pos = .SubItems(1).Text
-            BoardPos.pos_current.last_pos = .SubItems(2).Text
-            BoardPos.pos_current.Symbols = .SubItems(3).Text
-            BoardPos.pos_current.Arrows = .SubItems(4).Text
-            BoardPos.pos_current.FEN = .SubItems(5).Text
-            BoardPos.pos_current.Comments = .SubItems(6).Text
-            ThePOS.SetFEN(BoardPos.pos_current.FEN)
+    
+
+
+#Region "Gestion TVposition"
+
+    Private Sub tvPositions_AfterSelect(ByVal sender As System.Object, ByVal e As System.Windows.Forms.TreeViewEventArgs) Handles tvPositions.AfterSelect
+
+        lbl_status.Text = tvPositions.SelectedNode.Tag
+
+        With lvPositions.Items(CInt(lbl_status.Text.Replace("k", "")))
+
+            BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
+            BoardPos.SAN = .SubItems(1).Text
+            BoardPos.next_pos = .SubItems(2).Text
+            BoardPos.last_pos = .SubItems(3).Text
+            BoardPos.Symbols = .SubItems(4).Text
+            BoardPos.Arrows = .SubItems(5).Text
+            BoardPos.FEN = .SubItems(6).Text
+            BoardPos.Comments = .SubItems(7).Text
+            ThePOS.SetFEN(BoardPos.FEN)
         End With
         DrawEveryThing()
+
+
+    End Sub
+
+    'procedure recursive 
+    'trouve le noeud ayant pour clé "thekey" dans l'ensemble de tous les noeuds et le renvoie dans "FindNode"
+    Public Sub Find_Node_By_Key(ByVal myNodes As TreeNodeCollection, ByVal thekey As String, _
+                                ByRef FindNode As TreeNode, ByRef isFind As Boolean)
+        Dim Child As TreeNode
+
+        If myNodes.ContainsKey(thekey) Then
+            FindNode = myNodes(thekey)
+            isFind = True
+        Else
+            If isFind = False Then
+                For Each Child In myNodes
+                    Find_Node_By_Key(Child.Nodes, thekey, FindNode, isFind)
+                Next
+            End If
+        End If
+
+    End Sub
+
+    'ajoute un noeud dans la treeview sous le noeud ayant pour clé "keyParent"
+    Public Sub Add_child_Node(ByRef tvw As TreeView, ByVal keyParent As String, _
+                       ByVal key As String, ByVal text As String)
+        Dim aNode As New TreeNode
+        Dim NewNode As New TreeNode
+        Dim isFind As Boolean
+
+        isFind = False
+
+        Find_Node_By_Key(tvw.Nodes, keyParent, aNode, isFind)
+
+        NewNode = aNode.Nodes.Add(key, text)
+        NewNode.Tag = key
+
+    End Sub
+
+    Private Sub Add_Pos_TV(ByVal id_pos As Integer)
+
+        Dim aText As String = ""
+        Dim k As String
+
+        k = Trim(BoardPos.col_Positions(id_pos).last_pos)
+        If k <> "" Then k = k.Substring(5, k.Length - 5)
+
+        Add_child_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
+
+
+    End Sub
+
+    Private Sub UpdateTreeView()
+
+        tvPositions.Nodes.Clear()
+        tvPositions.Nodes.Add("0k", "Start")
+        tvPositions.Nodes(0).Tag = "0k"
+
+        For i = 1 To BoardPos.nb_pos - 1
+            Add_Pos_TV(i)
+        Next
+
+        tvPositions.Nodes(0).ExpandAll()
+        tvPositions.Nodes(0).EnsureVisible()
+        tvPositions.Nodes(tvPositions.Nodes.Count - 1).EnsureVisible()
+
     End Sub
 
 
 
-   
-    Private Sub lvPositions_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lvPositions.SelectedIndexChanged
+
+#End Region
+
+
+
+    Private Function PGAline(ByVal id_pos As Integer) As String
+        Dim tempo As String
+        tempo = ""
+        With BoardPos.col_Positions(id_pos)
+            tempo &= id_pos & "¤"
+            tempo &= .SAN & "¤"
+            tempo &= .next_pos & "¤"
+            tempo &= .last_pos & "¤"
+            tempo &= .Symbols & "¤"
+            tempo &= .Arrows & "¤"
+            tempo &= .FEN & "¤"
+            tempo &= .Comments & "¤"
+            tempo &= vbCrLf
+
+        End With
+
+        Return tempo
+    End Function
+
+    'ouvre une boite de dialogue et renvoie le nom d'un fichier
+    Public Function NameFile() As String
+        Dim nomfichier As String = ""
+
+        On Error GoTo ErrorHandler
+
+        With OpenFileDialog1
+            'On spécifie l'extension de fichiers visibles
+            .FileName = ""
+            .Filter = "ARD Files (*.*) | *.*"
+            'On affiche et teste le retour du dialogue
+            If .ShowDialog = Windows.Forms.DialogResult.OK Then
+                'On récupère le nom du fichier
+                nomfichier = .FileName
+            End If
+        End With
+
+        Return nomfichier
+
+        Exit Function
+ErrorHandler:
+
+        MsgBox("Error in Function NameFile : " & vbCrLf & Err.Description)
+
+    End Function
+
+
+    Private Sub SaveToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SaveToolStripMenuItem.Click
+        Dim NumFile As Integer
+        Dim TheFileName As String = ""
+
+        While My.Computer.FileSystem.FileExists(Application.StartupPath & "\game" & NumFile.ToString & ".pga")
+            NumFile += 1
+        End While
+
+        TheFileName = Application.StartupPath & "\game" & NumFile.ToString & ".pga"
+
+        Try
+            For i = 0 To BoardPos.nb_pos - 1
+                My.Computer.FileSystem.WriteAllText(TheFileName, PGAline(i), True)
+            Next
+
+        Catch ex As Exception
+
+            MsgBox("Impossible de sauvegarder : " & TheFileName, MsgBoxStyle.Exclamation, "ERREUR")
+
+        End Try
+    End Sub
+
+    Private Sub LoadToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles LoadToolStripMenuItem.Click
+        Dim NomFichier As String
+
+        NomFichier = NameFile()
+        If NomFichier <> "" Then
+
+            BoardPos.LoadFromFile(NomFichier)
+
+            UpdateDATA()
+
+        End If
+    End Sub
+
+    Private Sub PictureBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PictureBox1.Click
 
     End Sub
 End Class

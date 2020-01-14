@@ -4,6 +4,7 @@
 
     Public size_square As Integer 'taille d'une case en pixel
     Public size_border As Byte 'taille du contour de l'échiquier
+    Public Reversed As Boolean
 
     Public Structure color_sq
         Dim Alt As Byte
@@ -86,12 +87,23 @@
         colonne = id_square Mod 10
         ligne = id_square \ 10
 
-        With rect_tempo
-            .X = size_border + (colonne - 1) * size_square
-            .Y = size_border + (8 - ligne) * size_square
-            .Width = size_square
-            .Height = size_square
-        End With
+        If Reversed Then
+
+            With rect_tempo
+                .X = size_border + (8 - colonne) * size_square
+                .Y = size_border + (ligne - 1) * size_square
+                .Width = size_square
+                .Height = size_square
+            End With
+
+        Else
+            With rect_tempo
+                .X = size_border + (colonne - 1) * size_square
+                .Y = size_border + (8 - ligne) * size_square
+                .Width = size_square
+                .Height = size_square
+            End With
+        End If
 
         Return rect_tempo
 
@@ -120,5 +132,6 @@
 
     Public Sub New()
         size_border = 18
+        Reversed = False
     End Sub
 End Class

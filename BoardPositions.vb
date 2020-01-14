@@ -4,12 +4,12 @@
 
     'Type pour les données brutes
     Public Structure aPosition
-        Public id As Integer 'numéro de la position
-        Public next_pos As String 'les UCI et id des positions atégnables e2e4-1 a1a8-2 ...
+        Public SAN As String 'premier coup joué pour arrivé à cette position
+        Public next_pos As String 'les UCI et id des positions atégnables Cf3-g1f3-1 a1a8-2 ...
         Public last_pos As String 'les UCI et id des positions memant a celle ci b2b3-12 5 3 ...
         Public Arrows As String  'les fleches  e2e4-R d7d5-G ...
         Public Symbols As String  'les symboles e2-t d7-1 ...
-        Public FEN As String 'la FEN de la position
+        Public FEN As String 'la FEN de la position INDEX UNIQUE
         Public Comments As String 'x|y|text||x|y|text||...
     End Structure
 
@@ -27,36 +27,31 @@
     'pour identifier simplement les champs STRING d'un FEN
     Private ChampsDuFEN As New SplitFEN
 
-    'collection des positions
-    Public col_Positions As Collection
+    'tableau des positions (en collection je galère trop sur les affectations)
+    'a redemensionner tous les 100 positions
+    Public col_Positions(110) As aPosition
 
-    'la position courante 
-    Public pos_current As aPosition
+    'l'id de la position courante 
+    Private pos_current As Integer
 
-    Public Event PositionAdded()
+    Public nb_pos As Integer
+    Public Last_SAN As String
 
-
-    'le premier champs du fen sert de clé
-    'TODO rend impossible de faire plusieurs ecran avec les meme pieces :-(
-    Private Function keyFEN(ByVal aFen As String) As String
-        Dim tempo = Split(aFen, " ")
-        Return tempo(0) & tempo(1)
-    End Function
+    Public Event PositionAdded(ByVal id_pos As Integer)
 
 
-    Public Function IdOfFen(ByVal aFen12 As String) As Integer
+    ''le premier champs du fen sert de clé
+    ''TODO rend impossible de faire plusieurs ecran avec les meme pieces :-(
+    'Private Function keyFEN(ByVal aFen As String) As String
+    '    Dim tempo = Split(aFen, " ")
+    '    Return tempo(0) & tempo(1)
+    'End Function
 
-        If col_Positions.Contains(aFen12) Then
-            Return col_Positions(aFen12).id
-        Else
-            Return col_Positions.Count + 1
-        End If
 
-    End Function
-
-    Private Sub clear_pos(ByRef aPos As aPosition)
-        With aPos
-            .id = 0
+    'efface la contenue d'une position 
+    Private Sub clear_pos(ByRef id_pos As Integer)
+        With col_Positions(id_pos)
+            .SAN = ""
             .last_pos = ""
             .next_pos = ""
             .FEN = ""
@@ -66,9 +61,10 @@
         End With
     End Sub
 
-    Private Sub init_pos_current()
-        With pos_current
-            .id = 1
+    'initialise la position 0
+    Private Sub init_first_pos()
+        With col_Positions(0)
+            .SAN = ""
             .last_pos = ""
             .next_pos = ""
             .FEN = InitFEN
@@ -78,25 +74,26 @@
         End With
     End Sub
 
-
     Public Sub New()
 
-        col_Positions = New Collection
+        init_first_pos()
+        pos_current = 0
 
-        init_pos_current()
+        nb_pos = 1
+        clear_pos(1)
 
-        col_Positions.Add(pos_current, keyFEN(InitFEN))
-        
     End Sub
 
 #Region "gestion des string list"
 
     'ajoute un symbole, le remplace ou l'efface dans pos_current
-    Public Sub AddOtherSymbol(ByVal str_square As String, ByVal str_color As String)
+    Public Sub AddOtherSymbol(ByVal str_square As String, ByVal str_color As String, _
+                              Optional ByVal id_pos As Integer = -1)
         Dim toDel As Integer
 
+        If id_pos = -1 Then id_pos = pos_current
 
-        With pos_current
+        With col_Positions(pos_current)
 
             If .Symbols.Contains(str_square & "-" & str_color) Then
                 'il existe avec la meme couleur on l'efface
@@ -119,12 +116,13 @@
     End Sub
 
     'ajoute une fèche, la remplace ou l'efface dans pos_current
-    Public Sub AddArrow(ByVal str_squares As String, ByVal str_color As String)
+    Public Sub AddArrow(ByVal str_squares As String, ByVal str_color As String, _
+                        Optional ByVal id_pos As Integer = -1)
         Dim toDel As Integer
 
+        If id_pos = -1 Then id_pos = pos_current
 
-
-        With pos_current
+        With col_Positions(id_pos)
             If .Arrows.Contains(str_squares & "-" & str_color) Then
                 'contient deja cette fleche avec cette couleur on l'efface
                 toDel = .Arrows.IndexOf(str_squares)
@@ -145,9 +143,12 @@
     End Sub
 
     'ajoute un deplacement NEXT
-    Private Sub AddNext(ByRef aPos As aPosition, ByVal str_squares As String, ByVal str_Id As String)
+    Private Sub AddNext(ByVal str_squares As String, ByVal str_Id As String, _
+                        Optional ByVal id_pos As Integer = -1)
 
-        With aPos
+        If id_pos = -1 Then id_pos = pos_current
+
+        With col_Positions(id_pos)
             If Not .next_pos.Contains(str_squares) Then
                 .next_pos &= str_squares & "-" & str_Id & " "
             End If
@@ -156,9 +157,13 @@
     End Sub
 
     'ajoute un deplacement NEXT
-    Private Sub AddLast(ByRef aPos As aPosition, ByVal str_squares As String, ByVal str_Id As String)
+    Private Sub AddLast(ByVal str_squares As String, ByVal str_Id As String, _
+                        Optional ByVal id_pos As Integer = -1)
 
-        With aPos
+
+        If id_pos = -1 Then id_pos = pos_current
+
+        With col_Positions(id_pos)
             If Not .last_pos.Contains(str_squares) Then
                 .last_pos &= str_squares & "-" & str_Id & " "
             End If
@@ -168,81 +173,192 @@
 
 #End Region
 
-    'efface la position Num et la remplace par la pos_current
-    Private Sub col_PositionsAdd(ByVal apos As aPosition)
-        If col_Positions.Contains(keyFEN(apos.FEN)) Then
-            col_Positions.Remove(keyFEN(apos.FEN))
-        End If
-        col_Positions.Add(apos, keyFEN(apos.FEN))
-    End Sub
+    Private Function Id_Of_FEN(ByVal aFen As String) As Integer
+        For i = 0 To nb_pos
+            If col_Positions(i).FEN = aFen Then
+                Return i
+            End If
+        Next
+        Return nb_pos
+    End Function
 
 
     'changement de position suite a un mouvement 
     Public Sub change_Pos_move(ByVal sqFrom As String, ByVal sqTo As String, ByVal new_FEN As String)
-        'on veut mettre à jour la position1 menant à la position2
-        'la position1 peut exister ou pas
+
+        Dim id1, id2 As Integer
+        'on veut mettre à jour la pos_current menant à la position2
+        'la pos_current existe
         '   on doit ajouter next_pos et trouver l'id de la position suivante
         'la position2 peut existe ou pas
         '   on doit y rajouter last_pos avec l'ancien id
-
-        Dim pos1, pos2, pos_tempo As New aPosition
-        Dim Key1, Key2 As String
-
-        'sauvegarde la position courrante 
-        Key1 = keyFEN(pos_current.FEN)
-
 
         '---------------------------------------------------------------
         ' MAJ DE POSITION 1
         '---------------------------------------------------------------
         'on arrive pos_current contient toute la postion1 sauf next et l'id de position 2
 
-        'si la position courante existe la supprime
-        If col_Positions.Contains(Key1) Then
-            pos_tempo = col_Positions(Key1)
-            col_Positions.Remove(Key1)
-        End If
-
-
         'sauvegarde de la position courante
-        pos1 = pos_current
+        id1 = pos_current
 
         '---------------------------------------------------------------
         ' AJOUT DE POSITION 2
         '---------------------------------------------------------------
 
         'récupérer les infos de la position suivante si elle existe
-        Key2 = keyFEN(new_FEN)
+        id2 = Id_Of_FEN(new_FEN)
 
-        If col_Positions.Contains(Key2) Then
-            'elle existe on la place dans pos_current et pos2
-            pos_current = col_Positions(Key2)
-            pos2 = col_Positions(Key2)
-
-
+        If id2 < nb_pos Then
             'rajoute le coups au coup précédant possible
-            AddLast(pos2, sqFrom & sqTo, pos1.id)
+            AddLast(sqFrom & sqTo, id1, id2)
 
         Else 'elle n existe pas => nouvelle position
-            clear_pos(pos2)
-            pos2.FEN = new_FEN
-            pos2.last_pos = sqFrom & sqTo & "-" & pos1.id & " "
-            pos2.id = col_Positions.Count + 2
-
+            col_Positions(id2).FEN = new_FEN
+            col_Positions(id2).SAN = Last_SAN
+            col_Positions(id2).last_pos = sqFrom & sqTo & "-" & id1 & " "
+            nb_pos += 1
+            clear_pos(nb_pos)
         End If
 
+
+
         'on ajoute dans pos1 le coup aux coups suivants memant vers pos2
-        AddNext(pos1, sqFrom & sqTo, pos2.id)
+        AddNext(sqFrom & sqTo, id2, id1)
 
-        col_PositionsAdd(pos1)
-        col_PositionsAdd(pos2)
+        pos_current = id2
 
-        pos_current = pos2
-
-        RaiseEvent PositionAdded()
+        RaiseEvent PositionAdded(id2)
 
 
     End Sub
 
-   
+
+    Public Function LoadFromFile(ByVal NameFile As String) As Boolean
+        Dim RecTempo() As String                'tableau de toute les lignes
+        Dim DataLine() As String
+        Dim RecordsInFile As String = ""        'texte complet du fichier
+        Dim iLigne As Integer = 0              'compteur de ligne
+
+        If NameFile = "" Then Return False
+
+        If Not My.Computer.FileSystem.FileExists(NameFile) Then Return False
+
+        Try
+            RecordsInFile = My.Computer.FileSystem.ReadAllText(NameFile)
+        Catch ex As Exception
+            Return False
+        End Try
+
+        RecTempo = RecordsInFile.Split(vbCrLf) 'sépare les différentes lignes
+
+        For iLigne = 0 To RecTempo.Count - 2
+            DataLine = RecTempo(iLigne).Split("¤")
+            With col_Positions(iLigne)
+                .SAN = DataLine(1)
+                .next_pos = DataLine(2)
+                .last_pos = DataLine(3)
+
+                .Symbols = DataLine(4)
+                .Arrows = DataLine(5)
+                .FEN = DataLine(6)
+                .Comments = DataLine(7)
+            End With
+        Next
+
+        nb_pos = iLigne
+        pos_current = iLigne - 1
+        Return True
+    End Function
+
+
+#Region "Property"
+
+    Property Id() As Integer
+        Get
+            Return pos_current
+        End Get
+        Set(ByVal Value As Integer)
+            pos_current = Value
+        End Set
+    End Property
+
+    Property Arrows() As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).Arrows
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).Arrows = Value
+        End Set
+    End Property
+
+    Property SAN() As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).SAN
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).SAN = Value
+        End Set
+    End Property
+
+    Property next_pos(Optional ByVal Id As Integer = -1) As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).next_pos
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).next_pos = Value
+        End Set
+    End Property
+
+    Property last_pos(Optional ByVal Id As Integer = -1) As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).last_pos
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).last_pos = Value
+        End Set
+    End Property
+
+    Property Symbols(Optional ByVal Id As Integer = -1) As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).Symbols
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).Symbols = Value
+        End Set
+    End Property
+
+    Property FEN(Optional ByVal Id As Integer = -1) As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).FEN
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).FEN = Value
+        End Set
+    End Property
+
+    Property Comments(Optional ByVal Id As Integer = -1) As String
+        Get
+            If Id = -1 Then Id = pos_current
+            Return col_Positions(Id).Comments
+        End Get
+        Set(ByVal Value As String)
+            If Id = -1 Then Id = pos_current
+            col_Positions(Id).Comments = Value
+        End Set
+    End Property
+
+#End Region
+
 End Class

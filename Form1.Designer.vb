@@ -22,6 +22,7 @@ Partial Class frmMain
     'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmMain))
         Me.mnGetRec = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnGetMoves = New System.Windows.Forms.ToolStripMenuItem()
@@ -43,13 +44,20 @@ Partial Class frmMain
         Me.ColumnHeader5 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.ColumnHeader6 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.Comments = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.ColumnHeader7 = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.menuLV = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.LoadToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.tvPositions = New System.Windows.Forms.TreeView()
         Me.pbReduire = New System.Windows.Forms.PictureBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.lbl_status = New System.Windows.Forms.Label()
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
+        Me.menuLV.SuspendLayout()
         Me.TabPage3.SuspendLayout()
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -150,7 +158,8 @@ Partial Class frmMain
         '
         'lvPositions
         '
-        Me.lvPositions.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.ColumnHeader1, Me.ColumnHeader2, Me.ColumnHeader3, Me.ColumnHeader4, Me.ColumnHeader5, Me.ColumnHeader6, Me.Comments})
+        Me.lvPositions.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.ColumnHeader1, Me.ColumnHeader2, Me.ColumnHeader3, Me.ColumnHeader4, Me.ColumnHeader5, Me.ColumnHeader6, Me.Comments, Me.ColumnHeader7})
+        Me.lvPositions.ContextMenuStrip = Me.menuLV
         Me.lvPositions.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvPositions.FullRowSelect = True
         Me.lvPositions.GridLines = True
@@ -168,23 +177,49 @@ Partial Class frmMain
         '
         'ColumnHeader2
         '
-        Me.ColumnHeader2.Text = "Next"
+        Me.ColumnHeader2.Text = "Move"
         '
         'ColumnHeader3
         '
-        Me.ColumnHeader3.Text = "Last"
+        Me.ColumnHeader3.Text = "Next"
         '
         'ColumnHeader4
         '
-        Me.ColumnHeader4.Text = "Symbols"
+        Me.ColumnHeader4.Text = "Last"
         '
         'ColumnHeader5
         '
-        Me.ColumnHeader5.Text = "Arrows"
+        Me.ColumnHeader5.Text = "Symbols"
         '
         'ColumnHeader6
         '
-        Me.ColumnHeader6.Text = "FEN"
+        Me.ColumnHeader6.Text = "Arrows"
+        '
+        'Comments
+        '
+        Me.Comments.Text = "FEN"
+        '
+        'ColumnHeader7
+        '
+        Me.ColumnHeader7.Text = "Comments"
+        '
+        'menuLV
+        '
+        Me.menuLV.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.LoadToolStripMenuItem, Me.SaveToolStripMenuItem})
+        Me.menuLV.Name = "menuLV"
+        Me.menuLV.Size = New System.Drawing.Size(101, 48)
+        '
+        'LoadToolStripMenuItem
+        '
+        Me.LoadToolStripMenuItem.Name = "LoadToolStripMenuItem"
+        Me.LoadToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
+        Me.LoadToolStripMenuItem.Text = "Load"
+        '
+        'SaveToolStripMenuItem
+        '
+        Me.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem"
+        Me.SaveToolStripMenuItem.Size = New System.Drawing.Size(100, 22)
+        Me.SaveToolStripMenuItem.Text = "Save"
         '
         'TabPage3
         '
@@ -200,6 +235,7 @@ Partial Class frmMain
         'tvPositions
         '
         Me.tvPositions.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvPositions.Indent = 10
         Me.tvPositions.Location = New System.Drawing.Point(3, 3)
         Me.tvPositions.Name = "tvPositions"
         Me.tvPositions.Size = New System.Drawing.Size(473, 511)
@@ -225,14 +261,28 @@ Partial Class frmMain
         Me.PictureBox1.TabIndex = 0
         Me.PictureBox1.TabStop = False
         '
+        'lbl_status
+        '
+        Me.lbl_status.Location = New System.Drawing.Point(488, 558)
+        Me.lbl_status.Name = "lbl_status"
+        Me.lbl_status.Size = New System.Drawing.Size(476, 23)
+        Me.lbl_status.TabIndex = 15
+        Me.lbl_status.Text = "Label1"
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(983, 567)
+        Me.ClientSize = New System.Drawing.Size(1283, 708)
+        Me.Controls.Add(Me.lbl_status)
         Me.Controls.Add(Me.pbReduire)
         Me.Controls.Add(Me.TabControl1)
         Me.Controls.Add(Me.PictureBox1)
+        Me.KeyPreview = True
         Me.MinimumSize = New System.Drawing.Size(768, 480)
         Me.Name = "frmMain"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
@@ -240,6 +290,7 @@ Partial Class frmMain
         Me.TabControl1.ResumeLayout(False)
         Me.TabPage1.ResumeLayout(False)
         Me.TabPage2.ResumeLayout(False)
+        Me.menuLV.ResumeLayout(False)
         Me.TabPage3.ResumeLayout(False)
         CType(Me.pbReduire, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
@@ -270,5 +321,11 @@ Partial Class frmMain
     Friend WithEvents ColumnHeader5 As System.Windows.Forms.ColumnHeader
     Friend WithEvents ColumnHeader6 As System.Windows.Forms.ColumnHeader
     Friend WithEvents Comments As System.Windows.Forms.ColumnHeader
+    Friend WithEvents ColumnHeader7 As System.Windows.Forms.ColumnHeader
+    Friend WithEvents lbl_status As System.Windows.Forms.Label
+    Friend WithEvents menuLV As System.Windows.Forms.ContextMenuStrip
+    Friend WithEvents LoadToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents SaveToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents OpenFileDialog1 As System.Windows.Forms.OpenFileDialog
 
 End Class

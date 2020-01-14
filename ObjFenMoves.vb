@@ -153,13 +153,16 @@
 
     End Function
 
+
+
+
     'renvoie l'INDEX d'une case a partir de son nom 
     'SquareIndex(xy)=10*y+x
     ' exemple :
     '   SquareIndex(a1)=11
     '   SquareIndex(h8)=88
     'ou 0 en cas d'erreur
-    Public Function SquareIndex(ByVal sqName As String) As Byte
+    Public Function SquareIndex(ByVal sqName As String, Optional ByVal reversed As Boolean = False) As Byte
         Dim lettre As Char
         Dim colonne As Byte
         Dim ligne As Byte
@@ -175,6 +178,12 @@
 
         If ligne < 1 Or ligne > 8 Then Return 0
 
+        If reversed Then
+            Return (9 - ligne) * 10 + (9 - colonne)
+        Else
+            Return ligne * 10 + colonne
+        End If
+
         Return ligne * 10 + colonne
 
     End Function
@@ -182,7 +191,7 @@
     'renvoie le nom d'une case sous la forme e2
     'ou un caractère vide en cas d'erreur
     'SquareName(11)=a1
-    Private Function SquareName(ByVal sqIndex As Byte) As String
+    Public Function SquareName(ByVal sqIndex As Byte, Optional ByVal reversed As Boolean = False) As String
         Dim lettre As Char
         Dim colonne As Byte
         Dim ligne As Byte
@@ -195,6 +204,11 @@
             ligne = sqIndex \ 10
 
             If ligne < 1 Or ligne > 8 Then Return ""
+
+            If reversed Then
+                ligne = 9 - ligne
+                colonne = 9 - colonne
+            End If
 
             lettre = Chr(colonne + 96) 'recupere le numero de colonne
 
@@ -544,6 +558,9 @@
 
     'deplace une piece avec  deux index
     Private Sub MovePiece(ByVal sqiFrom As Integer, ByVal sqiTo As Integer)
+        'TODO NE MARCHE PAS
+        'remetre à zero le compteur en cas de prise
+        'If Board10x10(sqiTo) <> " " Then aFEN.nbSinceLastPawn = 0
         'place la piece de depart sur la case d'arrivé
         Board10x10(sqiTo) = Board10x10(sqiFrom)
         'efface la case de depart
@@ -643,7 +660,7 @@
         aFEN.sqiEnPassant = 0
 
         SwitchToPlay()
-        aFEN.nbSinceLastPawn += 1
+        aFEN.nbSinceLastPawn += 1 '
 
     End Sub
 
@@ -747,7 +764,7 @@
             strFEN &= " "
             strFEN &= IIf(aFEN.sqiEnPassant <> 0, SquareName(aFEN.sqiEnPassant), "-")
             strFEN &= " "
-            strFEN &= aFEN.nbSinceLastPawn
+            strFEN &= "0" 'TODO FAIRE FONCTIONNER aFEN.nbSinceLastPawn
             strFEN &= " "
             strFEN &= Math.Truncate(aFEN.nbMovesPlayed)
         End With
@@ -915,7 +932,7 @@
                 aFEN.sqiEnPassant = 0
             End If
 
-            'determnation du nombre de 1/2 coup
+            'determnation du nombre de 1/2 coup depuis la derniere prise ????
             aFEN.nbSinceLastPawn = CInt(.c5nbDemiCoup)
 
             'determination du nombre de coup joué
@@ -979,6 +996,7 @@
         End If
 
         '------------------- AUGMENTE OU REMET A 0 LE NB -----------------------
+        'TODO A FAIRE AUSSI EN CAS DE PRISE
         If UCase(Board10x10(sqiFROM)) = "P" _
             Or UCase(sqiTO) = "P" Then
             aFEN.nbSinceLastPawn = 0
