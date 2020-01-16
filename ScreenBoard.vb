@@ -1,10 +1,17 @@
-﻿Public Class ScreenBoard
+﻿Imports System.Drawing.Drawing2D
+
+Public Class ScreenBoard
 
     'classe regroupant toutes les variables nécessaires pour gérer l'échiquier gaphique
 
     Public size_square As Integer 'taille d'une case en pixel
     Public size_border As Byte 'taille du contour de l'échiquier
     Public Reversed As Boolean
+    Public nb_arrow As Byte = 0
+    Public path_arrow(32) As GraphicsPath
+    Public ToId_arrow(32) As Integer
+    Public Arrow_Over As Byte
+
 
     Public Structure color_sq
         Dim Alt As Byte
@@ -22,13 +29,11 @@
         Dim Alt As Boolean 'bouton alt enfoncé ?
         Dim Shift As Boolean 'bouton Shift enfoncé ?
         Dim Control As Boolean 'bouton Control enfoncé ?
-
-        
     End Structure
 
     Public clicDown, clicUp As aBoardClic
 
-    Public Color_square As Color_sq
+    Public Color_square As color_sq
 
     'list des symboles de déplacement à dessiner sur l'échiquier sous la forme "e4" & "t"
     'e4t signifie sur la case e4 se trouve le symbole t (correspondant à un bitmap)
@@ -109,13 +114,61 @@
 
     End Function
 
+    'renvoie un rectangle entre 2 case
+    'square peut etre une coordonné a1 ou un index 11
+    Public Function rect_squares(ByVal square1, ByVal square2) As Rectangle
+        Dim colonne1, colonne2 As Byte
+        Dim ligne1, ligne2 As Byte
+        Dim rect_tempo As Rectangle
+        Dim id_square1, id_square2 As Byte
+
+        If TypeOf square1 Is String Then
+            id_square1 = index_Square(square1)
+        Else
+            id_square1 = CByte(square1)
+        End If
+
+        If TypeOf square2 Is String Then
+            id_square2 = index_Square(square2)
+        Else
+            id_square2 = CByte(square2)
+        End If
+
+        colonne1 = id_square1 Mod 10
+        ligne1 = id_square1 \ 10
+
+        colonne2 = id_square2 Mod 10
+        ligne2 = id_square2 \ 10
+
+        If Reversed Then
+
+            With rect_tempo
+                .X = size_border + (8 - colonne2) * size_square
+                .Y = size_border + (ligne2 - 1) * size_square
+                .Width = size_square * (colonne2 - colonne1 + 1)
+                .Height = size_square * (ligne1 - ligne2 + 1)
+            End With
+
+        Else
+            With rect_tempo
+                .X = size_border + (colonne1 - 1) * size_square
+                .Y = size_border + (8 - ligne1) * size_square
+                .Width = size_square * (colonne2 - colonne1 + 1)
+                .Height = size_square * (ligne1 - ligne2 + 1)
+            End With
+        End If
+
+        Return rect_tempo
+
+    End Function
+
     'renvoie le centre d'une case
     Public Function pt_center(ByVal square) As Point
         Dim pt_tempo As Point
         Dim id_square As Byte
 
         If TypeOf square Is String Then
-            id_square = index_square(square)
+            id_square = index_Square(square)
         Else
             id_square = CByte(square)
         End If
@@ -133,5 +186,9 @@
     Public Sub New()
         size_border = 18
         Reversed = False
+        Arrow_Over = 255
+        For i = 0 To 32
+            ToId_arrow(i) = -1
+        Next
     End Sub
 End Class

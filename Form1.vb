@@ -33,6 +33,13 @@ Public Class frmMain
 
     'TODO A PLACER DANS BoardPositions
 
+    Public Enum enu_Arrow_Type
+        Arrow_Default = 0
+        Arrow_Next = 1
+        Arrow_Last = 2
+    End Enum
+
+
 
 
 #Region "Les Images PNG"
@@ -66,8 +73,10 @@ Public Class frmMain
 
     Public WithEvents BoardPos As New BoardPositions
 
-    Dim bmp_backBuffer As Bitmap  'New Bitmap(My.Resources.board100)
-    Dim gr_chessboard As Graphics ' = Graphics.FromImage(bmp_backBuffer)
+    Dim bmp_backBuffer As Bitmap
+
+    Dim gr_chessboard As Graphics
+
 
     'variable globale quelle horreur
     'Dim sqFrom As String
@@ -324,7 +333,7 @@ Public Class frmMain
             str_to = tempo(i).Substring(2, 2)
             chr_Color = tempo(i).Substring(5, 1)
             'TODO rajouter le décallage
-            DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), chr_Color)
+            DrawArrow(str_from, str_to, chr_Color) ' TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), chr_Color)
         Next
     End Sub
 
@@ -341,7 +350,8 @@ Public Class frmMain
             str_from = tempo(i).Substring(0, 2)
             str_to = tempo(i).Substring(2, 2)
             'TODO rajouter le décallage
-            DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), "N")
+
+            DrawArrow(str_from, str_to, "N", 15, enu_Arrow_Type.Arrow_Next)
         Next
     End Sub
 
@@ -355,10 +365,11 @@ Public Class frmMain
         tempo = Trim(BoardPos.last_pos).Split(" ")
 
         For i = 0 To tempo.Count - 1
+
             str_from = tempo(i).Substring(0, 2)
             str_to = tempo(i).Substring(2, 2)
-            'TODO rajouter le décallage
-            DrawArrow(TheScreenBoard.pt_center(str_from), TheScreenBoard.pt_center(str_to), "N")
+
+            DrawArrow(str_from, str_to, "W", 15, enu_Arrow_Type.Arrow_Last)
         Next
     End Sub
 
@@ -483,17 +494,34 @@ Public Class frmMain
 
     End Sub
 
-    Public Sub DrawArrow(ByVal pt_from As Point, ByVal pt_to As Point, _
-                          ByVal str_Color As String)
+    Public Sub DrawArrow(ByVal str_from As String, ByVal str_to As String, _
+                          ByVal str_Color As String, Optional ByVal pc_size As Integer = 0, Optional ByVal arrow_Type As Byte = 0)
 
-        Dim px_size As Byte
-        px_size = TheScreenBoard.size_square / 100 * 20
+
+        Dim pt_from, pt_to As Point
+
+        pt_from = TheScreenBoard.pt_center(str_from)
+        pt_to = TheScreenBoard.pt_center(str_to)
+
+        Dim px_size As Integer
+
+        If pc_size = 0 Then
+            px_size = TheScreenBoard.size_square / 100 * 20
+        Else
+            px_size = TheScreenBoard.size_square / 100 * pc_size
+        End If
+
+
+        pt_to = pt_between(pt_to, pt_from, 0, TheScreenBoard.size_square / 5)
+
+
         Dim rect_from As Rectangle
 
         Dim pts_list As New List(Of Point)
         Dim pts_array() As Point
         Dim ptype() As Byte
         Dim grpt As GraphicsPath
+
 
         With rect_from
             .X = pt_from.X - px_size / 2
@@ -521,15 +549,35 @@ Public Class frmMain
         grpt = New GraphicsPath
 
         grpt.AddPolygon(pts_array)
-        'gr_chessboard1.DrawPath(Pens.Black, grpt)
+
+        With TheScreenBoard
+            If arrow_Type = enu_Arrow_Type.Arrow_Next Then
+                .ToId_arrow(.nb_arrow) = str_Between(BoardPos.next_pos, str_from & str_to & "-", " ")
+                .path_arrow(.nb_arrow) = New GraphicsPath
+                .path_arrow(.nb_arrow).AddPolygon(pts_array)
+                .nb_arrow += 1 'pour sauvegarder les gr path des flèches
+            End If
+            If arrow_Type = enu_Arrow_Type.Arrow_Last Then
+                .ToId_arrow(.nb_arrow) = str_Between(BoardPos.last_pos, str_from & str_to & "-", " ")
+                .path_arrow(.nb_arrow) = New GraphicsPath
+                .path_arrow(.nb_arrow).AddPolygon(pts_array)
+                .nb_arrow += 1 'pour sauvegarder les gr path des flèches
+            End If
+           
+
+        End With
 
         grpt.FillMode = 1
         grpt.AddEllipse(rect_from)
 
         gr_chessboard.FillPath(aBrush, grpt)
-        'gr_chessboard1.FillPath(aBrush, grpt)
+
+
+
 
     End Sub
+
+   
 
     'calcule les symboles de déplacement d'une pièce
     'et les places dans la list TheScreenBoard.MoveSymbols
@@ -586,6 +634,9 @@ Public Class frmMain
 
         Debug.Print("drawEVERY")
         If Me.WindowState = FormWindowState.Minimized Then Exit Sub
+
+        TheScreenBoard.nb_arrow = 0
+
         'dessine le fond et les bordures
         DrawChessBoard()
         'dessine les mouvements possibles
@@ -596,7 +647,7 @@ Public Class frmMain
 
         'dessine les fleches
         DrawAllArrows()
-       
+
 
         'dessine les pieces
         DrawAllPieces()
@@ -605,11 +656,84 @@ Public Class frmMain
         DrawAllLastMovesArrows()
         DrawAllNextMovesArrows()
 
+        'dessine les commentaires
+        DrawAllComments()
+
         'raffraichit l'affichage
         PictureBox1.Image = bmp_backBuffer
     End Sub
 
+
+    'dessine les commentaires
+    Public Sub DrawAllComments()
+        Dim tempo() As String
+        Dim str_Top, str_Bottom As String
+        Dim str_comment As String
+
+        If BoardPos.Comments = "" Then Exit Sub
+
+        tempo = Trim(BoardPos.Comments).Split("|")
+
+        For i = 0 To tempo.Count - 1
+
+            str_Top = tempo(i).Substring(0, 2)
+            str_Bottom = tempo(i).Substring(2, 2)
+            str_comment = tempo(i).Substring(5)
+
+            DrawComment(str_Top, str_Bottom, str_comment)
+        Next
+
+    End Sub
+
+
+    'dessine un commentaire
+    Public Sub DrawComment(ByVal Topleft As String, ByVal BottomRight As String, ByVal aComment As String)
+        Dim aBrush As New SolidBrush(Color.FromArgb(255, 255, 255, 255))
+        DrawRoundedRectangle(TheScreenBoard.rect_squares(Topleft, BottomRight))
+        Debug.Print(gr_chessboard.MeasureString(aComment.Replace("\n", vbCrLf), New Font("Tahoma", 20)).ToString)
+        gr_chessboard.DrawString(aComment.Replace("\n", vbCrLf), New Font("Tahoma", 20), aBrush, TheScreenBoard.pt_center(Topleft))
+    End Sub
+
+    Public Sub DrawRoundedRectangle(ByVal aRect As Rectangle)
+        Dim rt As Rectangle = aRect
+        Dim radius As Integer = TheScreenBoard.size_square / 2
+        Dim p As New Pen(Color.Black, 2)
+        Dim gp As New GraphicsPath
+        Dim aBrush As New SolidBrush(Color.FromArgb(192, 0, 0, 0))
+        gp.AddLine(rt.X + radius, rt.Y, rt.X + rt.Width - (radius * 2), rt.Y)
+        gp.AddArc(rt.X + rt.Width - (radius * 2), rt.Y, radius * 2, radius * 2, 270, 90)
+        gp.AddLine(rt.X + rt.Width, rt.Y + radius, rt.X + rt.Width, rt.Y + rt.Height - (radius * 2))
+        gp.AddArc(rt.X + rt.Width - (radius * 2), rt.Y + rt.Height - (radius * 2), radius * 2, radius * 2, 0, 90)
+        gp.AddLine(rt.X + rt.Width - (radius * 2), rt.Y + rt.Height, rt.X + radius, rt.Y + rt.Height)
+        gp.AddArc(rt.X, rt.Y + rt.Height - (radius * 2), radius * 2, radius * 2, 90, 90)
+        gp.AddLine(rt.X, rt.Y + rt.Height - (radius * 2), rt.X, rt.Y + radius)
+        gp.AddArc(rt.X, rt.Y, radius * 2, radius * 2, 180, 90)
+        gp.CloseFigure()
+        gr_chessboard.FillPath(aBrush, gp)
+        gp.Dispose()
+
+    End Sub
+
 #End Region
+
+    'renvoie le texte entre strAfter et strBefore dans strMain
+    ' strAfter & str_Between & strBefore
+    Public Function str_Between(ByVal strMain As String, ByVal strAfter As String, ByVal strBefore As String) As String
+        Dim iAfter, iBefore As Integer
+        Dim tempo As String
+
+        If strMain = "" Then Return "-1"
+
+        iAfter = strMain.IndexOf(strAfter)
+        tempo = strMain.Substring(iAfter + strAfter.Length)
+        iBefore = tempo.IndexOf(strBefore)
+
+        tempo = tempo.Substring(0, iBefore)
+
+        Return tempo
+
+    End Function
+
 
 #Region "Evenement de la form1"
 
@@ -718,6 +842,10 @@ Public Class frmMain
 
 #Region "Evenement de la picturebox1"
 
+    Private Sub PictureBox1_GiveFeedback(ByVal sender As Object, ByVal e As System.Windows.Forms.GiveFeedbackEventArgs) Handles PictureBox1.GiveFeedback
+
+    End Sub
+
     'recupère les infos du clic puis la case que l'on a cliqué
     'clic normal
     '   deplacement de la pièce qui s'y trouve
@@ -725,6 +853,9 @@ Public Class frmMain
     'clic droit
     '   debut d'un tracé ou d'un placement de symbole
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
+
+
+        If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
 
         'récupère les infos du clic et les place dans .clicDown
         With TheScreenBoard.clicDown
@@ -820,6 +951,8 @@ Public Class frmMain
 
         Cursor = Cursors.Hand
         TheScreenBoard.MoveSymbols = ""
+
+        If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
 
         'récupère les infos du clic et les place dans .clicDown
         With TheScreenBoard.clicUp
@@ -969,6 +1102,8 @@ Public Class frmMain
                 Return Color.FromArgb(128, 255, 255, 255)
             Case "N"
                 Return Color.FromArgb(64, 0, 0, 0)
+            Case "W"
+                Return Color.FromArgb(64, 255, 255, 255)
         End Select
     End Function
 
@@ -1009,13 +1144,13 @@ Public Class frmMain
         Return False
     End Function
 
-   
+
 
 #End Region
 
 #Region "Evenement listView"
 
-    
+
     Private Sub lvMoves_MouseClick1(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles lvMoves.MouseClick
         On Error Resume Next
         Debug.Print("BLANC " & lvMoves.Columns(1).Width & " NOIRS " & lvMoves.Columns(2).Width)
@@ -1185,7 +1320,7 @@ err:
 
     End Sub
 
-    
+
 
 
 #Region "Gestion TVposition"
@@ -1364,6 +1499,61 @@ ErrorHandler:
     End Sub
 
     Private Sub PictureBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PictureBox1.Click
+
+        Debug.Print("CLIC : " & TheScreenBoard.Arrow_Over)
+
+        If TheScreenBoard.Arrow_Over = 255 Then Exit Sub
+        If TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over) = -1 Then Exit Sub
+
+        lbl_status.Text = TheScreenBoard.Arrow_Over
+
+        With lvPositions.Items(TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over))
+
+            BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
+            BoardPos.SAN = .SubItems(1).Text
+            BoardPos.next_pos = .SubItems(2).Text
+            BoardPos.last_pos = .SubItems(3).Text
+            BoardPos.Symbols = .SubItems(4).Text
+            BoardPos.Arrows = .SubItems(5).Text
+            BoardPos.FEN = .SubItems(6).Text
+            BoardPos.Comments = .SubItems(7).Text
+            ThePOS.SetFEN(BoardPos.FEN)
+        End With
+        DrawEveryThing()
+    End Sub
+
+    Private Sub PictureBox1_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseMove
+        Dim aBrush As New SolidBrush(str2color("R"))
+
+        Dim OnArrow As Boolean
+
+        OnArrow = False
+
+        If TheScreenBoard.nb_arrow = 0 Then Exit Sub
+
+        If TheScreenBoard.Arrow_Over <> 255 Then
+            If TheScreenBoard.path_arrow(TheScreenBoard.Arrow_Over).IsVisible(e.X, e.Y) Then
+            Else
+                Debug.Print("EXIT " & TheScreenBoard.Arrow_Over)
+                TheScreenBoard.Arrow_Over = 255
+                DrawEveryThing()
+            End If
+        Else
+            For i = 0 To TheScreenBoard.nb_arrow - 1
+                If TheScreenBoard.path_arrow(i).IsVisible(e.X, e.Y) Then
+                    'on se trouve dans la fleche i
+                    If TheScreenBoard.Arrow_Over <> i Then
+                        'on se trouve dans une nouvelle fleche
+                        DrawEveryThing()
+                        gr_chessboard.DrawPath(Pens.Black, TheScreenBoard.path_arrow(i))
+                        PictureBox1.Image = bmp_backBuffer
+                        TheScreenBoard.Arrow_Over = i
+                        Debug.Print("ENTER = " & i & " " & e.X & " - " & e.Y)
+                        OnArrow = True
+                    End If
+                End If
+            Next
+        End If
 
     End Sub
 End Class
