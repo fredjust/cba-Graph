@@ -7,10 +7,19 @@ Public Class ScreenBoard
     Public size_square As Integer 'taille d'une case en pixel
     Public size_border As Byte 'taille du contour de l'échiquier
     Public Reversed As Boolean
+
     Public nb_arrow As Byte = 0
-    Public path_arrow(32) As GraphicsPath
-    Public ToId_arrow(32) As Integer
+    Public path_arrow(32) As GraphicsPath 'chemin des fleches
+    Public ToId_arrow(32) As Integer 'id de la position vers laquelle pointe la fleche
     Public Arrow_Over As Byte
+
+    Public nb_comment As Byte = 0
+    Public path_comment(16) As GraphicsPath 'chemin des zones
+    Public Idstr_comment(16) As String 'case et couleur de la zone pour la retrouver
+    Public Comment_Over As Byte
+    Public str_Comment_Over As String
+
+    Public InputBoxRect As New Rectangle
 
 
     Public Structure color_sq
@@ -119,8 +128,11 @@ Public Class ScreenBoard
     Public Function rect_squares(ByVal square1, ByVal square2) As Rectangle
         Dim colonne1, colonne2 As Byte
         Dim ligne1, ligne2 As Byte
-        Dim rect_tempo As Rectangle
+        Dim rect_tempo, errRect As Rectangle
         Dim id_square1, id_square2 As Byte
+
+        On Error GoTo err
+
 
         If TypeOf square1 Is String Then
             id_square1 = index_Square(square1)
@@ -159,6 +171,14 @@ Public Class ScreenBoard
         End If
 
         Return rect_tempo
+err:
+        With errRect
+            .X = size_border
+            .Y = size_border
+            .Width = size_square * 2
+            .Height = size_square * 1
+        End With
+        Return errRect
 
     End Function
 
@@ -183,12 +203,94 @@ Public Class ScreenBoard
 
     End Function
 
+   
+
+    Public Sub Name2coord(ByVal strSquares As String)
+        Dim lettre1, lettre2 As Char
+        Dim colonne1, colonne2 As Byte
+        Dim ligne1, ligne2 As Byte
+
+        lettre1 = strSquares.Substring(0, 1)
+        colonne1 = Asc(lettre1) - 96 'recupere le numero de colonne
+        ligne1 = 8 - strSquares.Substring(1, 1)
+
+        lettre2 = strSquares.Substring(2, 1)
+        colonne2 = Asc(lettre2) - 96 'recupere le numero de colonne
+        ligne2 = 8 - strSquares.Substring(3, 1)
+
+        With InputBoxRect
+            .X = colonne1 - 1
+            .Y = ligne1
+            .Width = colonne2 - colonne1 + 1
+            .Height = ligne2 - ligne1 + 1
+        End With
+
+
+
+    End Sub
+
+    'renvoie les cases correspondant aux coordonnées de InputBoxRect
+    Public Function Coord2name() As String
+
+        Dim lettre As Char
+        Dim colonne As Byte
+        Dim ligne As Byte
+
+        Dim tempo As String = ""
+
+        colonne = InputBoxRect.X + 1
+        ligne = 8 - InputBoxRect.Y
+
+        If colonne < 1 Or colonne > 8 Then Return ""
+        If ligne < 1 Or ligne > 8 Then Return ""
+
+        If Reversed Then
+            ligne = 9 - ligne
+            colonne = 9 - colonne
+        End If
+
+        lettre = Chr(colonne + 96) 'recupere le numero de colonne
+
+        'ajoute la premiere case
+        tempo = lettre & ligne.ToString
+
+        colonne = InputBoxRect.X + InputBoxRect.Width
+        ligne = 8 - (InputBoxRect.Y + InputBoxRect.Height) + 1
+
+        If colonne < 1 Or colonne > 8 Then Return ""
+
+        If ligne < 1 Or ligne > 8 Then Return ""
+
+        If Reversed Then
+            ligne = 9 - ligne
+            colonne = 9 - colonne
+        End If
+
+        lettre = Chr(colonne + 96) 'recupere le numero de colonne
+
+        'ajoute la seconde case
+        tempo &= lettre & ligne.ToString
+
+        Return tempo
+
+    End Function
+
+
     Public Sub New()
         size_border = 18
         Reversed = False
         Arrow_Over = 255
+        Comment_Over = 255
         For i = 0 To 32
             ToId_arrow(i) = -1
         Next
+
+
+        With InputBoxRect
+            .X = 3
+            .Y = 2
+            .Width = 4
+            .Height = 2
+        End With
     End Sub
 End Class

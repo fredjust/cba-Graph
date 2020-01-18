@@ -50,10 +50,10 @@ Partial Class frmMain
         Me.SaveToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TabPage3 = New System.Windows.Forms.TabPage()
         Me.tvPositions = New System.Windows.Forms.TreeView()
-        Me.pbReduire = New System.Windows.Forms.PictureBox()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.lbl_status = New System.Windows.Forms.Label()
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
+        Me.pbReduire = New System.Windows.Forms.PictureBox()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
@@ -235,11 +235,24 @@ Partial Class frmMain
         'tvPositions
         '
         Me.tvPositions.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvPositions.HideSelection = False
         Me.tvPositions.Indent = 10
         Me.tvPositions.Location = New System.Drawing.Point(3, 3)
         Me.tvPositions.Name = "tvPositions"
         Me.tvPositions.Size = New System.Drawing.Size(473, 511)
         Me.tvPositions.TabIndex = 0
+        '
+        'lbl_status
+        '
+        Me.lbl_status.Location = New System.Drawing.Point(488, 558)
+        Me.lbl_status.Name = "lbl_status"
+        Me.lbl_status.Size = New System.Drawing.Size(476, 23)
+        Me.lbl_status.TabIndex = 15
+        Me.lbl_status.Text = "Label1"
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
         '
         'pbReduire
         '
@@ -260,18 +273,6 @@ Partial Class frmMain
         Me.PictureBox1.Size = New System.Drawing.Size(444, 447)
         Me.PictureBox1.TabIndex = 0
         Me.PictureBox1.TabStop = False
-        '
-        'lbl_status
-        '
-        Me.lbl_status.Location = New System.Drawing.Point(488, 558)
-        Me.lbl_status.Name = "lbl_status"
-        Me.lbl_status.Size = New System.Drawing.Size(476, 23)
-        Me.lbl_status.TabIndex = 15
-        Me.lbl_status.Text = "Label1"
-        '
-        'OpenFileDialog1
-        '
-        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
         '
         'frmMain
         '

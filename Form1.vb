@@ -69,7 +69,7 @@ Public Class frmMain
 #End Region
 
 
-    Dim TheScreenBoard As New ScreenBoard
+    Public TheScreenBoard As New ScreenBoard
 
     Public WithEvents BoardPos As New BoardPositions
 
@@ -158,7 +158,7 @@ Public Class frmMain
         rect.Width = TheScreenBoard.size_square
         rect.Height = TheScreenBoard.size_square
 
-        Dim aBrush As New SolidBrush(str2color(cColor))
+        Dim aBrush As New SolidBrush(ColorFromChar(cColor, 128))
         ' Create pen.
         Dim aPen As New Pen(aBrush, 1)
 
@@ -200,6 +200,8 @@ Public Class frmMain
         End While
         PictureBox1.Width = PictureBox1.Height
 
+
+
         bmp_backBuffer = New Bitmap(PictureBox1.Width, PictureBox1.Height)
         gr_chessboard = Graphics.FromImage(bmp_backBuffer)
 
@@ -236,6 +238,8 @@ Public Class frmMain
         gr_chessboard.DrawRectangle(Pens.Black, rect)
 
         TheScreenBoard.size_square = (PictureBox1.Height - TheScreenBoard.size_border * 2) / 8
+
+
 
 
         With TabControl1
@@ -544,7 +548,13 @@ Public Class frmMain
             ptype(i) = 1
         Next
 
-        Dim aBrush As New SolidBrush(str2color(str_Color))
+        Dim aBrush As Brush
+
+        If pc_size = 15 Then
+            aBrush = New SolidBrush(ColorFromChar(str_Color, 64))
+        Else
+            aBrush = New SolidBrush(ColorFromChar(str_Color, 128))
+        End If
 
         grpt = New GraphicsPath
 
@@ -563,7 +573,7 @@ Public Class frmMain
                 .path_arrow(.nb_arrow).AddPolygon(pts_array)
                 .nb_arrow += 1 'pour sauvegarder les gr path des flèches
             End If
-           
+
 
         End With
 
@@ -577,7 +587,7 @@ Public Class frmMain
 
     End Sub
 
-   
+
 
     'calcule les symboles de déplacement d'une pièce
     'et les places dans la list TheScreenBoard.MoveSymbols
@@ -636,6 +646,7 @@ Public Class frmMain
         If Me.WindowState = FormWindowState.Minimized Then Exit Sub
 
         TheScreenBoard.nb_arrow = 0
+        TheScreenBoard.nb_comment = 0
 
         'dessine le fond et les bordures
         DrawChessBoard()
@@ -667,39 +678,82 @@ Public Class frmMain
     'dessine les commentaires
     Public Sub DrawAllComments()
         Dim tempo() As String
-        Dim str_Top, str_Bottom As String
-        Dim str_comment As String
+        Dim str_Top, str_Bottom As String 'nom des cases sur lesquelles se trouve la zone
+        Dim str_comment As String 'le commentaire avec des \n pour retour chariot
+        Dim strBorderColor As String 'la couleur du contour
+        Dim strForeColor As String 'la couleur du texte
+        Dim strBackColor As String 'la couleur de la zone
 
         If BoardPos.Comments = "" Then Exit Sub
 
         tempo = Trim(BoardPos.Comments).Split("|")
 
-        For i = 0 To tempo.Count - 1
+        For i = 0 To tempo.Count - 2
 
             str_Top = tempo(i).Substring(0, 2)
             str_Bottom = tempo(i).Substring(2, 2)
-            str_comment = tempo(i).Substring(5)
+            strForeColor = tempo(i).Substring(4, 1)
+            strBackColor = tempo(i).Substring(5, 1)
+            strBorderColor = tempo(i).Substring(6, 1)
+            str_comment = tempo(i).Substring(8)
 
-            DrawComment(str_Top, str_Bottom, str_comment)
+            DrawComment(str_Top, str_Bottom, str_comment, "Tahoma", strForeColor, strBackColor, strBorderColor)
         Next
 
     End Sub
 
 
     'dessine un commentaire
-    Public Sub DrawComment(ByVal Topleft As String, ByVal BottomRight As String, ByVal aComment As String)
-        Dim aBrush As New SolidBrush(Color.FromArgb(255, 255, 255, 255))
-        DrawRoundedRectangle(TheScreenBoard.rect_squares(Topleft, BottomRight))
-        Debug.Print(gr_chessboard.MeasureString(aComment.Replace("\n", vbCrLf), New Font("Tahoma", 20)).ToString)
-        gr_chessboard.DrawString(aComment.Replace("\n", vbCrLf), New Font("Tahoma", 20), aBrush, TheScreenBoard.pt_center(Topleft))
+    Public Sub DrawComment(ByVal Topleft As String, ByVal BottomRight As String, _
+                           ByVal aComment As String, Optional ByVal NameFont As String = "Tahoma",
+                           Optional ByVal ForeColor As String = "W", Optional ByVal BackColor As String = "N", Optional ByVal BorderColor As String = "W")
+
+        Dim ForeBrush As New SolidBrush(ColorFromChar(ForeColor, 192))
+        Dim SizeFont As Single = 1
+        Dim rectText As SizeF
+
+        With TheScreenBoard
+            .path_comment(.nb_comment) = New GraphicsPath
+            .Idstr_comment(.nb_comment) = Topleft & BottomRight
+        End With
+
+        DrawRoundedRectangle(TheScreenBoard.rect_squares(Topleft, BottomRight), BackColor, BorderColor)
+
+        rectText = gr_chessboard.MeasureString(aComment.Replace("\n", vbCrLf), New Font(NameFont, SizeFont))
+
+        While rectText.Width < TheScreenBoard.rect_squares(Topleft, BottomRight).Width - TheScreenBoard.size_square / 2 And _
+            rectText.Height < TheScreenBoard.rect_squares(Topleft, BottomRight).Height - TheScreenBoard.size_square / 2
+            SizeFont += 1
+            rectText = gr_chessboard.MeasureString(aComment.Replace("\n", vbCrLf), New Font(NameFont, SizeFont))
+        End While
+
+        Dim pT As Point
+
+        pT.X = TheScreenBoard.rect_squares(Topleft, BottomRight).X + (TheScreenBoard.rect_squares(Topleft, BottomRight).Width - rectText.Width) / 2
+        pT.Y = TheScreenBoard.rect_squares(Topleft, BottomRight).Y + (TheScreenBoard.rect_squares(Topleft, BottomRight).Height - rectText.Height) / 2
+
+        gr_chessboard.DrawString(aComment.Replace("\n", vbCrLf), New Font(NameFont, SizeFont), ForeBrush, pT)
     End Sub
 
-    Public Sub DrawRoundedRectangle(ByVal aRect As Rectangle)
+    Public Sub DrawRoundedRectangle(ByVal aRect As Rectangle, Optional ByVal BackColor As String = "N", Optional ByVal BorderColor As String = "W")
         Dim rt As Rectangle = aRect
-        Dim radius As Integer = TheScreenBoard.size_square / 2
-        Dim p As New Pen(Color.Black, 2)
+        Dim radius As Integer = TheScreenBoard.size_square / 3
+        Dim BorderPen As Pen
         Dim gp As New GraphicsPath
-        Dim aBrush As New SolidBrush(Color.FromArgb(192, 0, 0, 0))
+        Dim BackBrush As Brush
+
+        'ajouter le path 
+
+        With TheScreenBoard
+            .path_comment(.nb_comment).AddRectangle(aRect)
+            .nb_comment += 1
+
+        End With
+
+
+
+        rt.Inflate(-2, -2)
+
         gp.AddLine(rt.X + radius, rt.Y, rt.X + rt.Width - (radius * 2), rt.Y)
         gp.AddArc(rt.X + rt.Width - (radius * 2), rt.Y, radius * 2, radius * 2, 270, 90)
         gp.AddLine(rt.X + rt.Width, rt.Y + radius, rt.X + rt.Width, rt.Y + rt.Height - (radius * 2))
@@ -709,7 +763,12 @@ Public Class frmMain
         gp.AddLine(rt.X, rt.Y + rt.Height - (radius * 2), rt.X, rt.Y + radius)
         gp.AddArc(rt.X, rt.Y, radius * 2, radius * 2, 180, 90)
         gp.CloseFigure()
-        gr_chessboard.FillPath(aBrush, gp)
+
+        BackBrush = New SolidBrush(ColorFromChar(BackColor, 192))
+        BorderPen = New Pen(ColorFromChar(BorderColor, 192), 4)
+
+        gr_chessboard.FillPath(BackBrush, gp)
+        gr_chessboard.DrawPath(BorderPen, gp)
         gp.Dispose()
 
     End Sub
@@ -734,6 +793,13 @@ Public Class frmMain
 
     End Function
 
+
+    Public Sub ShowCommentBox()
+
+        TheScreenBoard.Name2coord("c5f4")
+        frmComment.Show()
+
+    End Sub
 
 #Region "Evenement de la form1"
 
@@ -767,12 +833,23 @@ Public Class frmMain
         GreenCross.Dispose()
     End Sub
 
+    Private Sub frmMain_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
+        'Debug.Print(e.KeyCode)
+        Select Case e.KeyCode
+            Case 27
+                CloseInputBox()
+
+        End Select
+    End Sub
+
     Private Sub frmMain_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles Me.KeyPress
-        Debug.Print(e.KeyChar)
+        'Debug.Print(e.KeyChar)
         Select Case e.KeyChar
             Case "R"
                 TheScreenBoard.Reversed = Not TheScreenBoard.Reversed
                 DrawEveryThing()
+            Case "C"
+                ShowCommentBox()
         End Select
     End Sub
 
@@ -840,9 +917,20 @@ Public Class frmMain
 
 
 
+
 #Region "Evenement de la picturebox1"
 
-    Private Sub PictureBox1_GiveFeedback(ByVal sender As Object, ByVal e As System.Windows.Forms.GiveFeedbackEventArgs) Handles PictureBox1.GiveFeedback
+    Private Sub PictureBox1_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs) Handles PictureBox1.DoubleClick
+
+        'si on est au dessus d'une zone
+        If TheScreenBoard.Comment_Over <> 255 Then
+            TheScreenBoard.Name2coord(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over))
+            TheScreenBoard.str_Comment_Over = BoardPos.CommentAt(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over))
+            frmComment.Show()
+        End If
+        'entre en edition de la zone
+
+
 
     End Sub
 
@@ -855,7 +943,7 @@ Public Class frmMain
     Private Sub PictureBox1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseDown
 
 
-        If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
+        
 
         'récupère les infos du clic et les place dans .clicDown
         With TheScreenBoard.clicDown
@@ -894,6 +982,9 @@ Public Class frmMain
                 .Shift = True
                 .Control = True
             End If
+
+            If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
+            If TheScreenBoard.Comment_Over <> 255 Then Exit Sub
 
 
             If .RightClic Then 'on trace quelque chose
@@ -952,7 +1043,7 @@ Public Class frmMain
         Cursor = Cursors.Hand
         TheScreenBoard.MoveSymbols = ""
 
-        If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
+        
 
         'récupère les infos du clic et les place dans .clicDown
         With TheScreenBoard.clicUp
@@ -994,6 +1085,9 @@ Public Class frmMain
 
         End With
 
+        If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
+        If TheScreenBoard.Comment_Over <> 255 Then Exit Sub
+
         Dim sqFrom, sqTo As String
         sqFrom = TheScreenBoard.clicDown.str_Square
         sqTo = TheScreenBoard.clicUp.str_Square
@@ -1027,38 +1121,38 @@ Public Class frmMain
 
 #Region "Gestion des couleurs avec les touches ALT SHIT CTRL"
 
-    'renvoie la couleur correspondant aux dernières touches lors du clic
-    Public Function cur2color() As Color
+    ''renvoie la couleur correspondant aux dernières touches lors du clic
+    'Public Function cur2color() As Color
 
-        With TheScreenBoard.clicUp
+    '    With TheScreenBoard.clicUp
 
-            If .Alt Then
-                If .Shift Then
-                    Return str2color("M")
-                End If
-                If .Control Then
-                    Return str2color("C")
-                End If
-                Return str2color("B")
-            End If
+    '        If .Alt Then
+    '            If .Shift Then
+    '                Return ColorFromChar("M")
+    '            End If
+    '            If .Control Then
+    '                Return ColorFromChar("C")
+    '            End If
+    '            Return ColorFromChar("B")
+    '        End If
 
-            If .Shift Then
-                Return str2color("R")
-            End If
+    '        If .Shift Then
+    '            Return ColorFromChar("R")
+    '        End If
 
-            If .Control Then
-                Return str2color("Y")
-            End If
+    '        If .Control Then
+    '            Return ColorFromChar("Y")
+    '        End If
 
-        End With
+    '    End With
 
-        Return str2color("G")
+    '    Return ColorFromChar("G")
 
-    End Function
+    'End Function
 
     'Renvoie l'initiale de la couleur
     Public Function cur2str() As String
-        With TheScreenBoard.clicUp
+        With TheScreenBoard.clicDown
 
             If .Alt Then
                 If .Shift Then
@@ -1084,26 +1178,26 @@ Public Class frmMain
     End Function
 
     'renvoie la couleur correspondant à une initiale
-    Public Function str2color(ByVal str As String) As Color
+    Public Function ColorFromChar(ByVal str As String, ByVal alpha As Byte) As Color
         Select Case str
             Case "R"
-                Return Color.FromArgb(128, 255, 0, 0)
+                Return Color.FromArgb(alpha, 255, 0, 0)
             Case "G"
-                Return Color.FromArgb(128, 0, 255, 0)
+                Return Color.FromArgb(alpha, 0, 255, 0)
             Case "B"
-                Return Color.FromArgb(128, 0, 0, 255)
+                Return Color.FromArgb(alpha, 0, 0, 255)
             Case "Y"
-                Return Color.FromArgb(128, 255, 255, 0)
+                Return Color.FromArgb(alpha, 255, 255, 0)
             Case "M"
-                Return Color.FromArgb(128, 255, 0, 255)
+                Return Color.FromArgb(alpha, 255, 0, 255)
             Case "C"
-                Return Color.FromArgb(128, 0, 255, 255)
+                Return Color.FromArgb(alpha, 0, 255, 255)
             Case "W"
-                Return Color.FromArgb(128, 255, 255, 255)
+                Return Color.FromArgb(alpha, 255, 255, 255)
             Case "N"
-                Return Color.FromArgb(64, 0, 0, 0)
+                Return Color.FromArgb(alpha, 0, 0, 0)
             Case "W"
-                Return Color.FromArgb(64, 255, 255, 255)
+                Return Color.FromArgb(alpha, 255, 255, 255)
         End Select
     End Function
 
@@ -1181,22 +1275,11 @@ Public Class frmMain
 
     Private Sub lvPositions_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles lvPositions.SelectedIndexChanged
 
-        On Error GoTo err
 
-        With lvPositions.SelectedItems(0)
+        On Error Resume Next
+        MoveToId(lvPositions.SelectedItems(0).Index)
 
-            BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
-            BoardPos.SAN = .SubItems(1).Text
-            BoardPos.next_pos = .SubItems(2).Text
-            BoardPos.last_pos = .SubItems(3).Text
-            BoardPos.Symbols = .SubItems(4).Text
-            BoardPos.Arrows = .SubItems(5).Text
-            BoardPos.FEN = .SubItems(6).Text
-            BoardPos.Comments = .SubItems(7).Text
-            ThePOS.SetFEN(BoardPos.FEN)
-        End With
-        DrawEveryThing()
-err:
+        
 
     End Sub
 
@@ -1320,17 +1403,9 @@ err:
 
     End Sub
 
+    Public Sub MoveToId(ByVal id_Pos As Integer)
 
-
-
-#Region "Gestion TVposition"
-
-    Private Sub tvPositions_AfterSelect(ByVal sender As System.Object, ByVal e As System.Windows.Forms.TreeViewEventArgs) Handles tvPositions.AfterSelect
-
-        lbl_status.Text = tvPositions.SelectedNode.Tag
-
-        With lvPositions.Items(CInt(lbl_status.Text.Replace("k", "")))
-
+        With lvPositions.Items(id_Pos)
             BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
             BoardPos.SAN = .SubItems(1).Text
             BoardPos.next_pos = .SubItems(2).Text
@@ -1341,7 +1416,36 @@ err:
             BoardPos.Comments = .SubItems(7).Text
             ThePOS.SetFEN(BoardPos.FEN)
         End With
+
+        Dim aNode As New TreeNode
+        Dim NewNode As New TreeNode
+        Dim isFind As Boolean
+
+        isFind = False
+
+        Find_Node_By_Key(tvPositions.Nodes, id_Pos & "k", aNode, isFind)
+
+        If isFind Then
+            aNode.ForeColor = Color.Red
+            Debug.Print(aNode.FullPath)
+        End If
+
+
+        'If tvPositions.Nodes(id_Pos & "k").IsSelected Then
+        'Else
+        '    tvPositions.Nodes(id_Pos).ForeColor = Color.Red
+        'End If
         DrawEveryThing()
+    End Sub
+
+
+#Region "Gestion TVposition"
+
+    Private Sub tvPositions_AfterSelect(ByVal sender As System.Object, ByVal e As System.Windows.Forms.TreeViewEventArgs) Handles tvPositions.AfterSelect
+
+        lbl_status.Text = tvPositions.SelectedNode.Tag
+
+        MoveToId(CInt(lbl_status.Text.Replace("k", "")))
 
 
     End Sub
@@ -1378,6 +1482,7 @@ err:
 
         NewNode = aNode.Nodes.Add(key, text)
         NewNode.Tag = key
+        aNode.ForeColor = Color.Black
 
     End Sub
 
@@ -1385,9 +1490,15 @@ err:
 
         Dim aText As String = ""
         Dim k As String
-
+        
         k = Trim(BoardPos.col_Positions(id_pos).last_pos)
-        If k <> "" Then k = k.Substring(5, k.Length - 5)
+
+        If k.IndexOf(" ") <> -1 Then
+            If k <> "" Then k = k.Substring(5, k.IndexOf(" ") - 5)
+        Else
+            If k <> "" Then k = k.Substring(5)
+        End If
+
 
         Add_child_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
 
@@ -1407,6 +1518,9 @@ err:
         tvPositions.Nodes(0).ExpandAll()
         tvPositions.Nodes(0).EnsureVisible()
         tvPositions.Nodes(tvPositions.Nodes.Count - 1).EnsureVisible()
+
+        'Debug.Print(tvPositions.Nodes.Count)
+        'tvPositions.Nodes(0).ForeColor = Color.Blue
 
     End Sub
 
@@ -1498,43 +1612,69 @@ ErrorHandler:
         End If
     End Sub
 
+
+    Private Sub CloseInputBox()
+        If frmComment.Visible Then
+            BoardPos.AddComment(TheScreenBoard.Coord2name(), frmComment.txtComment.Text.Replace(vbCrLf, "\n"))
+            frmComment.Close()
+            update_Pos_LV()
+            Exit Sub
+        End If
+    End Sub
+
     Private Sub PictureBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PictureBox1.Click
+        Dim aColor As String
 
         Debug.Print("CLIC : " & TheScreenBoard.Arrow_Over)
 
-        If TheScreenBoard.Arrow_Over = 255 Then Exit Sub
-        If TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over) = -1 Then Exit Sub
+        CloseInputBox()
 
-        lbl_status.Text = TheScreenBoard.Arrow_Over
+        If TheScreenBoard.Comment_Over <> 255 Then
+            aColor = cur2str()
+            If TheScreenBoard.clicDown.RightClic Then
+                BoardPos.ModifCommentBorder(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over), aColor)
+            Else
+                BoardPos.ModifCommentFore(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over), aColor)
+            End If
+            update_Pos_LV()
+            DrawEveryThing()
+            Exit Sub
+        End If
 
-        With lvPositions.Items(TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over))
+        If TheScreenBoard.Arrow_Over <> 255 Then
+            If TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over) = -1 Then Exit Sub
 
-            BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
-            BoardPos.SAN = .SubItems(1).Text
-            BoardPos.next_pos = .SubItems(2).Text
-            BoardPos.last_pos = .SubItems(3).Text
-            BoardPos.Symbols = .SubItems(4).Text
-            BoardPos.Arrows = .SubItems(5).Text
-            BoardPos.FEN = .SubItems(6).Text
-            BoardPos.Comments = .SubItems(7).Text
-            ThePOS.SetFEN(BoardPos.FEN)
-        End With
+            lbl_status.Text = TheScreenBoard.Arrow_Over
+
+            With lvPositions.Items(TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over))
+
+                BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
+                BoardPos.SAN = .SubItems(1).Text
+                BoardPos.next_pos = .SubItems(2).Text
+                BoardPos.last_pos = .SubItems(3).Text
+                BoardPos.Symbols = .SubItems(4).Text
+                BoardPos.Arrows = .SubItems(5).Text
+                BoardPos.FEN = .SubItems(6).Text
+                BoardPos.Comments = .SubItems(7).Text
+                ThePOS.SetFEN(BoardPos.FEN)
+            End With
+        End If
+
         DrawEveryThing()
     End Sub
 
     Private Sub PictureBox1_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseMove
-        Dim aBrush As New SolidBrush(str2color("R"))
+
 
         Dim OnArrow As Boolean
 
         OnArrow = False
 
-        If TheScreenBoard.nb_arrow = 0 Then Exit Sub
 
         If TheScreenBoard.Arrow_Over <> 255 Then
             If TheScreenBoard.path_arrow(TheScreenBoard.Arrow_Over).IsVisible(e.X, e.Y) Then
             Else
-                Debug.Print("EXIT " & TheScreenBoard.Arrow_Over)
+                Debug.Print("EXIT ARROW " & TheScreenBoard.Arrow_Over)
                 TheScreenBoard.Arrow_Over = 255
                 DrawEveryThing()
             End If
@@ -1555,5 +1695,39 @@ ErrorHandler:
             Next
         End If
 
+        If TheScreenBoard.Comment_Over <> 255 Then
+            If TheScreenBoard.path_comment(TheScreenBoard.Comment_Over).IsVisible(e.X, e.Y) Then
+            Else
+                Debug.Print("EXIT ZONE " & TheScreenBoard.Comment_Over)
+                TheScreenBoard.Comment_Over = 255
+
+            End If
+        Else
+            'regarde si on est au dessus d'une zone
+            For i = 0 To TheScreenBoard.nb_comment - 1
+                If TheScreenBoard.path_comment(i).IsVisible(e.X, e.Y) Then
+                    'on se trouve dans la zone i
+                    TheScreenBoard.Comment_Over = i
+                    lbl_status.Text = TheScreenBoard.Idstr_comment(i)
+                End If
+            Next
+        End If
+
+
+
+
+
     End Sub
+
+
+
+
+
+
+
+
+
+
+
+
 End Class

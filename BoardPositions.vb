@@ -171,6 +171,67 @@
 
     End Sub
 
+    'ajoute un commentaire le remplace ou l'efface dans pos_current
+    Public Sub AddComment(ByVal str_squares As String, ByVal str_Comment As String, _
+                          Optional ByVal ForeColor As String = "W", Optional ByVal BackColor As String = "N", Optional ByVal BorderColor As String = "W", _
+                          Optional ByVal id_pos As Integer = -1)
+        Dim toDel As Integer
+        Dim tempo As String
+
+        If id_pos = -1 Then id_pos = pos_current
+
+        With col_Positions(id_pos)
+            If .Comments.Contains(str_squares) Then
+                toDel = .Comments.IndexOf(str_squares)
+                tempo = .Comments.Substring(toDel)
+                .Comments = .Comments.Remove(toDel, tempo.IndexOf("|") + 1)
+            End If
+            If str_Comment <> "" Then
+                .Comments &= str_squares & ForeColor & BackColor & BorderColor & "-" & _
+                    str_Comment & "|"
+            End If
+        End With
+
+    End Sub
+
+    Public Function CommentAt(ByVal strSquares As String) As String
+        Dim tempo As String = ""
+
+        tempo = Comments().Substring(Comments.IndexOf(strSquares) + 8)
+        tempo = tempo.Substring(0, tempo.IndexOf("|"))
+
+        Return tempo
+
+    End Function
+
+    Public Sub ModifCommentBorder(ByVal strSquares As String, ByVal ChrColor As String)
+        Dim tempo As String
+        Dim newTempo As String
+
+        tempo = Comments
+
+        tempo = tempo.Substring(tempo.IndexOf(strSquares), 7) 'e2f3RGB
+
+        newTempo = tempo.Substring(0, 6) & ChrColor
+
+        Comments = Comments.Replace(tempo, newTempo)
+
+    End Sub
+
+    Public Sub ModifCommentFore(ByVal strSquares As String, ByVal ChrColor As String)
+        Dim tempo As String
+        Dim newTempo As String
+
+        tempo = Comments
+
+        tempo = tempo.Substring(tempo.IndexOf(strSquares), 7) 'e2f3RGB
+
+        newTempo = tempo.Substring(0, 4) & ChrColor & tempo.Substring(5, 2)
+
+        Comments = Comments.Replace(tempo, newTempo)
+
+    End Sub
+
 #End Region
 
     Private Function Id_Of_FEN(ByVal aFen As String) As Integer
