@@ -51,8 +51,9 @@
 
 
     'efface la contenue d'une position 
-    Public Sub clear_pos(ByRef id_pos As Integer)
+    Public Sub clear_pos(ByVal id_pos As Integer)
         With col_Positions(id_pos)
+            .Id = id_pos
             .SAN = ""
             .last_pos = ""
             .next_pos = ""
@@ -67,6 +68,7 @@
     'initialise la position 0
     Private Sub init_first_pos()
         With col_Positions(0)
+            .Id = 0
             .SAN = ""
             .last_pos = ""
             .next_pos = ""
@@ -281,7 +283,11 @@
             col_Positions(id2).FEN = new_FEN
             col_Positions(id2).SAN = Last_SAN
             col_Positions(id2).last_pos = sqFrom & sqTo & "-" & id1 & " "
+            col_Positions(id2).Id = nb_pos
             nb_pos += 1
+            If nb_pos Mod 100 = 0 Then
+                ReDim col_Positions((nb_pos \ 100 + 1) * 100 + 10)
+            End If
             clear_pos(nb_pos)
         End If
 

@@ -234,6 +234,7 @@ Partial Class frmMain
         '
         'tvPositions
         '
+        Me.tvPositions.BackColor = System.Drawing.Color.AntiqueWhite
         Me.tvPositions.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tvPositions.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.tvPositions.Indent = 10

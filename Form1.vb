@@ -1321,7 +1321,7 @@ Public Class frmMain
 
         NbLigne = lvPositions.Items.Count
 
-        lvPositions.Items.Insert(NbLigne, CStr(BoardPos.col_Positions(Id_Pos).Id) & "k", CStr(Id_Pos) & " id", 0)    'numéro de la position
+        lvPositions.Items.Insert(NbLigne, CStr(BoardPos.col_Positions(Id_Pos).Id) & "k", CStr(BoardPos.col_Positions(Id_Pos).Id) & " id", 0)    'numéro de la position
 
         'Public Comments As String 'x|y|text||x|y|text||...
 
@@ -1508,7 +1508,8 @@ err:
 
         If isFind Then
             aNode.ForeColor = Color.White
-            aNode.BackColor = Color.Blue
+            aNode.BackColor = Color.Chocolate
+
             Debug.Print("SHOW " & byid)
             If byid = 0 Then
                 Debug.Print("ALERT " & byid)
@@ -1523,7 +1524,7 @@ err:
         Dim Child As TreeNode
         For Each Child In myNodes
             Child.ForeColor = Color.Black
-            Child.BackColor = Color.White
+            Child.BackColor = Color.AntiqueWhite
             'Child.Collapse()
             SwitchOffNode(Child.Nodes)
         Next
@@ -1618,11 +1619,11 @@ err:
         
         If BoardPos.col_Positions(id_pos).HaveBrother Then
             'il y a deux suites possibles
-            Add_child_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
+            Add_child_Node(tvPositions, k & "k", CStr(BoardPos.col_Positions(id_pos).Id) & "k", BoardPos.col_Positions(id_pos).SAN)
 
         Else
             'on modifie 
-            update_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
+            update_Node(tvPositions, k & "k", CStr(BoardPos.col_Positions(id_pos).Id) & "k", BoardPos.col_Positions(id_pos).SAN)
         End If
 
 
@@ -1899,5 +1900,41 @@ ErrorHandler:
 
         MoveToId(CInt(lbl_status.Text.Substring(0, lbl_status.Text.IndexOf("k"))))
 
+    End Sub
+
+    Private Sub tvPositions_AfterSelect(ByVal sender As System.Object, ByVal e As System.Windows.Forms.TreeViewEventArgs) Handles tvPositions.AfterSelect
+
+    End Sub
+
+    Private Sub PictureBox1_MouseWheel(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles PictureBox1.MouseWheel
+        Dim SizeFont As Integer
+
+        SizeFont = e.Delta * SystemInformation.MouseWheelScrollLines / 360
+
+
+        Dim AllPos() As String
+
+        Debug.Print(BoardPos.Id)
+
+        If SizeFont < 0 Then
+
+            If BoardPos.next_pos <> "" Then
+                AllPos = Trim(BoardPos.next_pos).Split(" ")
+                If AllPos.Count > 1 Then
+
+                Else
+                    MoveToId(AllPos(0).Substring(5))
+                End If
+            End If
+        Else
+            If BoardPos.last_pos <> "" Then
+                AllPos = Trim(BoardPos.last_pos).Split(" ")
+                If AllPos.Count > 1 Then
+
+                Else
+                    MoveToId(AllPos(0).Substring(5))
+                End If
+            End If
+        End If
     End Sub
 End Class
