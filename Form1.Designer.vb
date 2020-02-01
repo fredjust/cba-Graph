@@ -235,7 +235,7 @@ Partial Class frmMain
         'tvPositions
         '
         Me.tvPositions.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.tvPositions.HideSelection = False
+        Me.tvPositions.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.tvPositions.Indent = 10
         Me.tvPositions.Location = New System.Drawing.Point(3, 3)
         Me.tvPositions.Name = "tvPositions"

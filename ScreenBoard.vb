@@ -6,7 +6,7 @@ Public Class ScreenBoard
 
     Public size_square As Integer 'taille d'une case en pixel
     Public size_border As Byte 'taille du contour de l'échiquier
-    Public Reversed As Boolean
+    Public Reversed As Boolean 'si l'échiquier est affiché a l'envers (les noirs en bas)
 
     Public nb_arrow As Byte = 0
     Public path_arrow(32) As GraphicsPath 'chemin des fleches
@@ -19,7 +19,7 @@ Public Class ScreenBoard
     Public Comment_Over As Byte
     Public str_Comment_Over As String
 
-    Public InputBoxRect As New Rectangle
+    Public InputBoxRect As New Rectangle 'rectangle de la zone de saisie
 
 
     Public Structure color_sq
@@ -204,19 +204,60 @@ err:
     End Function
 
    
-
+    'modifie le rectangle en fonction des coordonnées de 2 cases
+    'EN COORDONNEES DE CASE
     Public Sub Name2coord(ByVal strSquares As String)
         Dim lettre1, lettre2 As Char
         Dim colonne1, colonne2 As Byte
         Dim ligne1, ligne2 As Byte
 
-        lettre1 = strSquares.Substring(0, 1)
-        colonne1 = Asc(lettre1) - 96 'recupere le numero de colonne
-        ligne1 = 8 - strSquares.Substring(1, 1)
+        'TODO SI L ECHIQUIER EST INVERSE
 
-        lettre2 = strSquares.Substring(2, 1)
-        colonne2 = Asc(lettre2) - 96 'recupere le numero de colonne
-        ligne2 = 8 - strSquares.Substring(3, 1)
+        If Reversed Then 'transforme e3g2 en b7d6
+
+            'Je reprend le prog apres 2 selmaine je ne comprends plus rien
+            'je fatigue c'est la merde
+            'j'inverse comme je peux
+
+            lettre1 = strSquares.Substring(0, 1)
+            colonne1 = Asc(lettre1) - 96 'recupere le numero de colonne
+            ligne1 = 9 - strSquares.Substring(1, 1)
+
+            lettre2 = strSquares.Substring(2, 1)
+            colonne2 = Asc(lettre2) - 96 'recupere le numero de colonne
+            ligne2 = 9 - strSquares.Substring(3, 1)
+
+            colonne1 = 9 - colonne1
+            lettre1 = Chr(colonne1 + 96)
+
+            colonne2 = 9 - colonne2
+            lettre2 = Chr(colonne2 + 96)
+
+            Dim tempo As String
+            tempo = lettre2 & ligne2 & lettre1 & ligne1
+
+            lettre1 = tempo.Substring(0, 1)
+            colonne1 = Asc(lettre1) - 96 'recupere le numero de colonne
+            ligne1 = 8 - tempo.Substring(1, 1)
+
+            lettre2 = tempo.Substring(2, 1)
+            colonne2 = Asc(lettre2) - 96 'recupere le numero de colonne
+            ligne2 = 8 - tempo.Substring(3, 1)
+
+
+
+        Else
+
+            lettre1 = strSquares.Substring(0, 1)
+            colonne1 = Asc(lettre1) - 96 'recupere le numero de colonne
+            ligne1 = 8 - strSquares.Substring(1, 1)
+
+            lettre2 = strSquares.Substring(2, 1)
+            colonne2 = Asc(lettre2) - 96 'recupere le numero de colonne
+            ligne2 = 8 - strSquares.Substring(3, 1)
+
+
+        End If
 
         With InputBoxRect
             .X = colonne1 - 1
@@ -270,6 +311,11 @@ err:
 
         'ajoute la seconde case
         tempo &= lettre & ligne.ToString
+
+        'on inverse
+        If Reversed Then
+            tempo = tempo.Substring(2, 2) & tempo.Substring(0, 2)
+        End If
 
         Return tempo
 

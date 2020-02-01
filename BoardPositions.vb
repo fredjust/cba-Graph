@@ -4,9 +4,11 @@
 
     'Type pour les données brutes
     Public Structure aPosition
+        Public Id As Integer
         Public SAN As String 'premier coup joué pour arrivé à cette position
         Public next_pos As String 'les UCI et id des positions atégnables Cf3-g1f3-1 a1a8-2 ...
         Public last_pos As String 'les UCI et id des positions memant a celle ci b2b3-12 5 3 ...
+        Public HaveBrother As Boolean 'la position a t elle des freres
         Public Arrows As String  'les fleches  e2e4-R d7d5-G ...
         Public Symbols As String  'les symboles e2-t d7-1 ...
         Public FEN As String 'la FEN de la position INDEX UNIQUE
@@ -49,7 +51,7 @@
 
 
     'efface la contenue d'une position 
-    Private Sub clear_pos(ByRef id_pos As Integer)
+    Public Sub clear_pos(ByRef id_pos As Integer)
         With col_Positions(id_pos)
             .SAN = ""
             .last_pos = ""
@@ -58,6 +60,7 @@
             .Arrows = ""
             .Symbols = ""
             .Comments = ""
+            .HaveBrother = False
         End With
     End Sub
 
@@ -71,6 +74,7 @@
             .Arrows = ""
             .Symbols = ""
             .Comments = ""
+            .HaveBrother = False
         End With
     End Sub
 
@@ -315,6 +319,7 @@
         For iLigne = 0 To RecTempo.Count - 2
             DataLine = RecTempo(iLigne).Split("¤")
             With col_Positions(iLigne)
+                .Id = DataLine(0)
                 .SAN = DataLine(1)
                 .next_pos = DataLine(2)
                 .last_pos = DataLine(3)

@@ -5,19 +5,19 @@
 '- lorsque deux variantes amène à la même position 
 '   permettre de changer celle qui se trouve dans la ligne principale
 '- permettre de retrouver la ligne principale si une variante arrive à la même position
-'- affiche les coups suivant sous forme de fleche
-'- un clic sur la fleche d'un coup pour le jouer
+'- affiche les coups suivant sous forme de fleche FAIT
+'- un clic sur la fleche d'un coup pour le jouer FAIT
 '- affiche les coups suivants dans la zone commentaires
 '- différentier visuellement les bons coups des mauvais (fleches ou case en couleur) sans les confondre avec d'autres fleches
-'- différentier le coup principale des variantes
+'- différentier le coup principale des variantes 
 '- pouvoir modifier un coup sans devoir tout ressaisir 
 '- saisir les commentaire directement sans validation
 '- enregistrer chaque modification automatiquement 
 '- afficher le feuille de la variante completement sans commentaire
 '- 3 zones échiquier commentaires et coups
-'- ne pas melanger les commentaires avec les coups
+'- ne pas melanger les commentaires avec les coups FAIT SUR LECHIQUIER
 '- un commentaire par position (possibilité d'afficher les commentaires suivants)
-'- ne pas se limiter a 3 couleurs (rouge vert jaune
+'- ne pas se limiter a 3 couleurs (rouge vert jaune FAIT
 'bleu le coups possibles
 'blanc noir ...(couleur standard CSS)
 '- permettre la saisi d'un coup illégal
@@ -642,7 +642,6 @@ Public Class frmMain
     'dessine tout une fois pour toutes
     Public Sub DrawEveryThing()
 
-        Debug.Print("drawEVERY")
         If Me.WindowState = FormWindowState.Minimized Then Exit Sub
 
         TheScreenBoard.nb_arrow = 0
@@ -672,7 +671,16 @@ Public Class frmMain
 
         'raffraichit l'affichage
         PictureBox1.Image = bmp_backBuffer
+
+        ShowNode(BoardPos.Id)
+
+        Debug.Print("DRAW EVERY " & BoardPos.Id)
+
+        
+
     End Sub
+
+
 
 
     'dessine les commentaires
@@ -850,6 +858,10 @@ Public Class frmMain
                 DrawEveryThing()
             Case "C"
                 ShowCommentBox()
+            Case "D"
+                'efface la position
+                BoardPos.col_Positions(BoardPos.Id).FEN = ""
+                UpdateDATA()
         End Select
     End Sub
 
@@ -1267,7 +1279,9 @@ Public Class frmMain
         lvPositions.Items.Clear()
 
         For i = 0 To BoardPos.nb_pos - 1
+
             Add_Pos_LV(i)
+
         Next
 
         lvPositions.Items(BoardPos.Id).Selected = True
@@ -1303,9 +1317,11 @@ Public Class frmMain
     Public Sub Add_Pos_LV(ByVal Id_Pos As Integer)
         Dim NbLigne As Integer
 
+
+
         NbLigne = lvPositions.Items.Count
 
-        lvPositions.Items.Insert(NbLigne, CStr(Id_Pos) & "k", CStr(Id_Pos) & " id", 0)    'numéro de la position
+        lvPositions.Items.Insert(NbLigne, CStr(BoardPos.col_Positions(Id_Pos).Id) & "k", CStr(Id_Pos) & " id", 0)    'numéro de la position
 
         'Public Comments As String 'x|y|text||x|y|text||...
 
@@ -1405,6 +1421,12 @@ err:
 
     Public Sub MoveToId(ByVal id_Pos As Integer)
 
+        Debug.Print("MOVETO " & id_Pos)
+
+        If id_Pos = 0 Then
+            Debug.Print("ALERTE MOVETO " & id_Pos)
+        End If
+
         With lvPositions.Items(id_Pos)
             BoardPos.Id = .SubItems(0).Text.Replace(" id", "")
             BoardPos.SAN = .SubItems(1).Text
@@ -1417,38 +1439,21 @@ err:
             ThePOS.SetFEN(BoardPos.FEN)
         End With
 
-        Dim aNode As New TreeNode
-        Dim NewNode As New TreeNode
-        Dim isFind As Boolean
-
-        isFind = False
-
-        Find_Node_By_Key(tvPositions.Nodes, id_Pos & "k", aNode, isFind)
-
-        If isFind Then
-            aNode.ForeColor = Color.Red
-            Debug.Print(aNode.FullPath)
-        End If
+        
 
 
         'If tvPositions.Nodes(id_Pos & "k").IsSelected Then
         'Else
         '    tvPositions.Nodes(id_Pos).ForeColor = Color.Red
         'End If
+
         DrawEveryThing()
     End Sub
 
 
 #Region "Gestion TVposition"
 
-    Private Sub tvPositions_AfterSelect(ByVal sender As System.Object, ByVal e As System.Windows.Forms.TreeViewEventArgs) Handles tvPositions.AfterSelect
 
-        lbl_status.Text = tvPositions.SelectedNode.Tag
-
-        MoveToId(CInt(lbl_status.Text.Replace("k", "")))
-
-
-    End Sub
 
     'procedure recursive 
     'trouve le noeud ayant pour clé "thekey" dans l'ensemble de tous les noeuds et le renvoie dans "FindNode"
@@ -1469,6 +1474,80 @@ err:
 
     End Sub
 
+    Public Function myNodesContainsTag(ByVal myNodes As TreeNodeCollection, ByVal theTag As String, ByRef FindNode As TreeNode) As Integer
+        Dim aNode As TreeNode
+        Dim tempo As String
+        For Each aNode In myNodes
+            tempo = aNode.Tag
+
+            If tempo.IndexOf(" " & theTag) > 0 Then
+                FindNode = aNode
+                Return True
+            End If
+
+            If tempo.IndexOf(theTag) = 0 Then
+
+                FindNode = aNode
+                Return True
+            End If
+
+        Next
+        Return False
+    End Function
+
+    Public Sub ShowNode(ByVal byid As Integer)
+        Dim aNode As New TreeNode
+        Dim NewNode As New TreeNode
+        Dim isFind As Boolean
+
+        SwitchOffNode(tvPositions.Nodes)
+
+        isFind = False
+
+        Find_Node_By_Tag(tvPositions.Nodes, byid & "k", aNode, isFind)
+
+        If isFind Then
+            aNode.ForeColor = Color.White
+            aNode.BackColor = Color.Blue
+            Debug.Print("SHOW " & byid)
+            If byid = 0 Then
+                Debug.Print("ALERT " & byid)
+            End If
+            'aNode.Expand()
+            'aNode.ExpandAll()
+            'aNode.EnsureVisible()
+        End If
+    End Sub
+
+    Public Sub SwitchOffNode(ByVal myNodes As TreeNodeCollection)
+        Dim Child As TreeNode
+        For Each Child In myNodes
+            Child.ForeColor = Color.Black
+            Child.BackColor = Color.White
+            'Child.Collapse()
+            SwitchOffNode(Child.Nodes)
+        Next
+    End Sub
+
+
+    'procedure recursive 
+    'trouve le noeud ayant pour clé "thekey" dans l'ensemble de tous les noeuds et le renvoie dans "FindNode"
+    Public Sub Find_Node_By_Tag(ByVal myNodes As TreeNodeCollection, ByVal theTag As String, _
+                                ByRef FindNode As TreeNode, ByRef isFind As Boolean)
+        Dim Child As TreeNode
+
+        If myNodesContainsTag(myNodes, theTag, FindNode) Then
+            isFind = True
+        Else
+            If isFind = False Then
+                For Each Child In myNodes
+                    Find_Node_By_Tag(Child.Nodes, theTag, FindNode, isFind)
+                Next
+            End If
+        End If
+
+    End Sub
+
     'ajoute un noeud dans la treeview sous le noeud ayant pour clé "keyParent"
     Public Sub Add_child_Node(ByRef tvw As TreeView, ByVal keyParent As String, _
                        ByVal key As String, ByVal text As String)
@@ -1478,11 +1557,35 @@ err:
 
         isFind = False
 
-        Find_Node_By_Key(tvw.Nodes, keyParent, aNode, isFind)
+        Find_Node_By_Tag(tvw.Nodes, keyParent, aNode, isFind)
 
         NewNode = aNode.Nodes.Add(key, text)
         NewNode.Tag = key
-        aNode.ForeColor = Color.Black
+
+
+    End Sub
+
+
+    'modifie un noeud dans la treeview en ajoutant le coup
+    Public Sub update_Node(ByRef tvw As TreeView, ByVal keyParent As String, _
+                       ByVal key As String, ByVal text As String)
+        Dim aNode As New TreeNode
+        Dim NewNode As New TreeNode
+        Dim isFind As Boolean
+
+        isFind = False
+
+        Find_Node_By_Tag(tvw.Nodes, keyParent, aNode, isFind)
+
+        If text.Contains("...") Then
+            aNode.Text &= text.Substring(text.IndexOf(" ")) & "  "
+        Else
+            aNode.Text &= " " & text
+        End If
+
+
+        aNode.Tag &= " " & key
+
 
     End Sub
 
@@ -1490,8 +1593,12 @@ err:
 
         Dim aText As String = ""
         Dim k As String
-        
+        Dim np() As String
+        Dim nextId As Integer
+
         k = Trim(BoardPos.col_Positions(id_pos).last_pos)
+        np = Trim(BoardPos.col_Positions(id_pos).next_pos).Split(" ")
+
 
         If k.IndexOf(" ") <> -1 Then
             If k <> "" Then k = k.Substring(5, k.IndexOf(" ") - 5)
@@ -1499,8 +1606,28 @@ err:
             If k <> "" Then k = k.Substring(5)
         End If
 
+        'si la position a plusieurs fils 
+        'il faut les mmodifier 
+        If np.Count > 1 Then
+            For i = 0 To np.Count - 1
+                nextId = np(i).Substring(5)
+                BoardPos.col_Positions(nextId).HaveBrother = True
+            Next
+        End If
 
-        Add_child_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
+        
+        If BoardPos.col_Positions(id_pos).HaveBrother Then
+            'il y a deux suites possibles
+            Add_child_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
+
+        Else
+            'on modifie 
+            update_Node(tvPositions, k & "k", CStr(id_pos) & "k", BoardPos.col_Positions(id_pos).SAN)
+        End If
+
+
+
+
 
 
     End Sub
@@ -1512,11 +1639,13 @@ err:
         tvPositions.Nodes(0).Tag = "0k"
 
         For i = 1 To BoardPos.nb_pos - 1
-            Add_Pos_TV(i)
+            If BoardPos.col_Positions(i).FEN <> "" Then
+                Add_Pos_TV(i)
+            End If
         Next
 
         tvPositions.Nodes(0).ExpandAll()
-        tvPositions.Nodes(0).EnsureVisible()
+        'tvPositions.Nodes(0).EnsureVisible()
         tvPositions.Nodes(tvPositions.Nodes.Count - 1).EnsureVisible()
 
         'Debug.Print(tvPositions.Nodes.Count)
@@ -1535,7 +1664,7 @@ err:
         Dim tempo As String
         tempo = ""
         With BoardPos.col_Positions(id_pos)
-            tempo &= id_pos & "¤"
+            tempo &= .Id & "¤"
             tempo &= .SAN & "¤"
             tempo &= .next_pos & "¤"
             tempo &= .last_pos & "¤"
@@ -1589,7 +1718,9 @@ ErrorHandler:
 
         Try
             For i = 0 To BoardPos.nb_pos - 1
-                My.Computer.FileSystem.WriteAllText(TheFileName, PGAline(i), True)
+                If BoardPos.col_Positions(i).FEN <> "" Then
+                    My.Computer.FileSystem.WriteAllText(TheFileName, PGAline(i), True)
+                End If
             Next
 
         Catch ex As Exception
@@ -1708,6 +1839,7 @@ ErrorHandler:
                 If TheScreenBoard.path_comment(i).IsVisible(e.X, e.Y) Then
                     'on se trouve dans la zone i
                     TheScreenBoard.Comment_Over = i
+                    Debug.Print("ENTER ZONE " & TheScreenBoard.Comment_Over)
                     lbl_status.Text = TheScreenBoard.Idstr_comment(i)
                 End If
             Next
@@ -1730,4 +1862,42 @@ ErrorHandler:
 
 
 
+    Private Sub tvPositions_MouseWheel(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles tvPositions.MouseWheel
+        Dim SizeFont As Integer
+
+        SizeFont = e.Delta * SystemInformation.MouseWheelScrollLines / 360
+
+
+        Dim AllPos() As String
+
+        Debug.Print(BoardPos.Id)
+
+        If SizeFont < 0 Then
+
+            If BoardPos.next_pos <> "" Then
+                AllPos = Trim(BoardPos.next_pos).Split(" ")
+                If AllPos.Count > 1 Then
+
+                Else
+                    MoveToId(AllPos(0).Substring(5))
+                End If
+            End If
+        Else
+            If BoardPos.last_pos <> "" Then
+                AllPos = Trim(BoardPos.last_pos).Split(" ")
+                If AllPos.Count > 1 Then
+
+                Else
+                    MoveToId(AllPos(0).Substring(5))
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub tvPositions_NodeMouseClick(ByVal sender As Object, ByVal e As System.Windows.Forms.TreeNodeMouseClickEventArgs) Handles tvPositions.NodeMouseClick
+        lbl_status.Text = e.Node.Tag
+
+        MoveToId(CInt(lbl_status.Text.Substring(0, lbl_status.Text.IndexOf("k"))))
+
+    End Sub
 End Class

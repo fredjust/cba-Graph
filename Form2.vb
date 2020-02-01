@@ -9,7 +9,9 @@
     Dim xd, yd As Integer
 
     Private Sub frmComment_Activated(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Activated
+        'Dim xtempo As Integer
 
+        'xtempo = frmMain.TheScreenBoard.InputBoxRect.X
         xd = frmMain.Width - frmMain.ClientRectangle.Width + 2
         yd = frmMain.Height - frmMain.ClientRectangle.Height + 2
         With Me
@@ -173,5 +175,9 @@
             frmMain.update_Pos_LV()
             Me.Close()
         End If
+    End Sub
+
+    Private Sub txtComment_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles txtComment.TextChanged
+
     End Sub
 End Class
