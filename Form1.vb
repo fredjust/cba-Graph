@@ -1098,7 +1098,7 @@ Public Class frmMain
         End With
 
         If TheScreenBoard.Arrow_Over <> 255 Then Exit Sub
-        If TheScreenBoard.Comment_Over <> 255 Then Exit Sub
+        'If TheScreenBoard.Comment_Over <> 255 Then Exit Sub
 
         Dim sqFrom, sqTo As String
         sqFrom = TheScreenBoard.clicDown.str_Square
@@ -1761,17 +1761,17 @@ ErrorHandler:
 
         CloseInputBox()
 
-        If TheScreenBoard.Comment_Over <> 255 Then
-            aColor = cur2str()
-            If TheScreenBoard.clicDown.RightClic Then
-                BoardPos.ModifCommentBorder(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over), aColor)
-            Else
-                BoardPos.ModifCommentFore(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over), aColor)
-            End If
-            update_Pos_LV()
-            DrawEveryThing()
-            Exit Sub
-        End If
+        'If TheScreenBoard.Comment_Over <> 255 Then
+        '    aColor = cur2str()
+        '    If TheScreenBoard.clicDown.RightClic Then
+        '        BoardPos.ModifCommentBorder(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over), aColor)
+        '    Else
+        '        BoardPos.ModifCommentFore(TheScreenBoard.Idstr_comment(TheScreenBoard.Comment_Over), aColor)
+        '    End If
+        '    update_Pos_LV()
+        '    DrawEveryThing()
+        '    Exit Sub
+        'End If
 
         If TheScreenBoard.Arrow_Over <> 255 Then
             If TheScreenBoard.ToId_arrow(TheScreenBoard.Arrow_Over) = -1 Then Exit Sub

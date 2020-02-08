@@ -286,7 +286,7 @@
             col_Positions(id2).Id = nb_pos
             nb_pos += 1
             If nb_pos Mod 100 = 0 Then
-                ReDim col_Positions((nb_pos \ 100 + 1) * 100 + 10)
+                ReDim Preserve col_Positions((nb_pos \ 100 + 1) * 100 + 10)
             End If
             clear_pos(nb_pos)
         End If
@@ -323,6 +323,11 @@
         RecTempo = RecordsInFile.Split(vbCrLf) 'sépare les différentes lignes
 
         For iLigne = 0 To RecTempo.Count - 2
+
+            If iLigne Mod 100 = 0 Then
+                ReDim Preserve col_Positions((iLigne \ 100 + 1) * 100 + 10)
+            End If
+
             DataLine = RecTempo(iLigne).Split("¤")
             With col_Positions(iLigne)
                 .Id = DataLine(0)
